@@ -139,7 +139,7 @@ def makeAllDshifts(alphabet=[0,1]):
 
 
 # Brute force time
-def bruteForceCheck(alphabet = [0,1],windowSize = "2x2"):
+def bruteForceCheck(alphabet = [0,1],windowSize = "2x2", half = False):
     allRs = makeAllRshifts(alphabet)
     allDs = makeAllDshifts(alphabet)
     validShifters = np.zeros((len(allRs),len(allDs)))
@@ -147,33 +147,32 @@ def bruteForceCheck(alphabet = [0,1],windowSize = "2x2"):
     idxR = 0
     idxD = 0
     idxV = 0
-    outputs = open(f"Valid Shift Arrays {windowSize} a{len(alphabet)}.txt","w")
+    outputs = open(f"Valid Shift Arrays {windowSize} a{len(alphabet)} Half{half}.txt","w")
     for rShift in allRs:
         for dShift in allDs:
             RD = np.matmul(rShift,dShift)
             RD = RD % len(alphabet)
             DR = np.matmul(dShift,rShift)
             DR = DR % len(alphabet)
-            if np.array_equal(RD,DR):
-                validShifters[idxR,idxD] = 1
-                outputs.write("Valid pair: \n")
-                outputs.write(f"R shifter:{idxR} \n")
-                np.savetxt(outputs,rShift, fmt = '%d')
-                outputs.write(f"D shifter:{idxD} \n")
-                np.savetxt(outputs,dShift, fmt = '%d')
-                idxV += 1
+            if half or idxD<=idxR:
+                if np.array_equal(RD,DR):
+                    validShifters[idxR,idxD] = 1
+                    outputs.write("Valid pair: \n")
+                    outputs.write(f"R shifter:{idxR} \n")
+                    np.savetxt(outputs,rShift, fmt = '%d')
+                    outputs.write(f"D shifter:{idxD} \n")
+                    np.savetxt(outputs,dShift, fmt = '%d')
+                    idxV += 1
             idxD += 1
         idxD = 0
         idxR += 1
     outputs.write(f"Number of valid shift pairs: {idxV} \n")
     plt.matshow(validShifters)
     plt.colorbar()
-    plt.savefig(f"Valid Shifters {windowSize} a{len(alphabet)}", dpi=300)
-
+    plt.savefig(f"Valid Shifters {windowSize} a{len(alphabet)} Half{half}", dpi=300)
     return()
 
-
-bruteForceCheck(alphabet = [0,1,2],windowSize = "2x2")
+bruteForceCheck(alphabet = [0,1,2],windowSize = "2x2", half = False)
 
 # find R^a = I = D^b
 def produceDeBT():
