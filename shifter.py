@@ -147,7 +147,7 @@ def bruteForceCheck(alphabet = [0,1],windowSize = "2x2", half = False):
     idxR = 0
     idxD = 0
     idxV = 0
-    outputs = open(f"Valid Shift Arrays {windowSize} a{len(alphabet)} Half{half}.txt","w")
+    outputs = open(f"ShiftPairs {windowSize} a{len(alphabet)} Half{half}.txt","w")
     for rShift in allRs:
         for dShift in allDs:
             RD = np.matmul(rShift,dShift)
@@ -169,11 +169,7 @@ def bruteForceCheck(alphabet = [0,1],windowSize = "2x2", half = False):
     outputs.write(f"Number of valid shift pairs: {idxV} \n")
     plt.matshow(validShifters)
     plt.colorbar()
-    plt.savefig(f"Valid Shifters {windowSize} a{len(alphabet)} Half{half}", dpi=300)
+    plt.savefig(f"ShiftPairs {windowSize} a{len(alphabet)} Half{half}", dpi=300)
     return()
 
 bruteForceCheck(alphabet = [0,1,2],windowSize = "2x2", half = False)
-
-# find R^a = I = D^b
-def produceDeBT():
-    return()
