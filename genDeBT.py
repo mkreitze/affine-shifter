@@ -65,7 +65,7 @@ def makeRowdeBT(firstInRow,R,m,alphabetSize): # makes the row by applying R m ti
     row = []
     for i in range(m):
         row.append(firstInRow[0])
-        row.append(firstInRow[2])
+        # row.append(firstInRow)
         firstInRow = np.matmul(R,firstInRow) 
         firstInRow = firstInRow % alphabetSize
     return(row)
@@ -79,11 +79,11 @@ for R,D in zip(allRs,allDs): # walks through all valid shifters
     m = determinePower(R,16,2,5)
     n = determinePower(D,16,2,5)
     if m*n == 16: # make general, 16 from binary alphabet on 2x2 window
-        # output.write(f"R shifter, power {m}: \n")
-        # np.savetxt(output,R, fmt = '%d')
-        # output.write(f"D shifter, power {n}: \n")
-        # np.savetxt(output,D, fmt = '%d')
+        output.write(f"R shifter, power {m}: \n")
+        np.savetxt(output,R, fmt = '%d')
+        output.write(f"D shifter, power {n}: \n")
+        np.savetxt(output,D, fmt = '%d')
         deBT = makedeBT(R,D,m,n,INITWINDOW,ALPHABET)
         print(m,n)
         print(deBT)
-        # output.write(deBT)
+        output.writelines(deBT)
