@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
 
-ALPHABET = 2
+ALPHABET = 3
 WINDOWSIZE = 4
 INPUT = "ShiftPairs 2x2 a2 HalfFalse.txt"
 OUTPUT = "deBTShifters 2x2 a2 HalfFalse.txt"
@@ -84,6 +84,4 @@ for R,D in zip(allRs,allDs): # walks through all valid shifters
         output.write(f"D shifter, power {n}: \n")
         np.savetxt(output,D, fmt = '%d')
         deBT = makedeBT(R,D,m,n,INITWINDOW,ALPHABET)
-        print(m,n)
-        print(deBT)
-        output.writelines(deBT)
+        output.writelines(str(deBT)+"\n")

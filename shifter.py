@@ -1,7 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
-VERBOSE = False
+VERBOSE = False # Prints out some reporting stats (not implemented properly)
+HALF = True # True -> Use full, False use half (sorry I know this is flipped) it reports correctly though!
+WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
+ALPHABET = [0,1,2] # enumerate alphabet, this is needed for determinant conditions
+
 # Makes default Rshift
 def initRShifter():
     rMat = np.zeros((5,5)) 
@@ -147,7 +151,7 @@ def bruteForceCheck(alphabet = [0,1],windowSize = "2x2", half = False):
     idxR = 0
     idxD = 0
     idxV = 0
-    outputs = open(f"ShiftPairs {windowSize} a{len(alphabet)} Half{half}.txt","w")
+    outputs = open(f"ShiftPairs {windowSize} a{len(alphabet)} Half{not(half)}.txt","w")
     for rShift in allRs:
         for dShift in allDs:
             RD = np.matmul(rShift,dShift)
@@ -169,7 +173,7 @@ def bruteForceCheck(alphabet = [0,1],windowSize = "2x2", half = False):
     outputs.write(f"Number of valid shift pairs: {idxV} \n")
     plt.matshow(validShifters)
     plt.colorbar()
-    plt.savefig(f"ShiftPairs {windowSize} a{len(alphabet)} Half{half}", dpi=300)
+    plt.savefig(f"ShiftPairs {windowSize} a{len(alphabet)} Half{not(half)}", dpi=300)
     return()
 
-bruteForceCheck(alphabet = [0,1,2],windowSize = "2x2", half = False)
+bruteForceCheck(ALPHABET,WINDOWSIZE,HALF)
