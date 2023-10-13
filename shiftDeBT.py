@@ -2,9 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
 VERBOSE = False # Prints out some reporting stats (not implemented properly)
-HALF = True # True -> Use full, False use half (sorry I know this is flipped) it reports correctly though!
+HALF = False # True -> Use full, False use half (sorry I know this is flipped) it reports correctly though!
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
-ALPHABET = [0,1,2] # enumerate alphabet, this is needed for determinant conditions
+ALPHABET = [0,1,2,3] # enumerate alphabet, this is needed for determinant conditions
+ALPHABETSIZE = len(ALPHABET)
+OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)} Half{not(HALF)}.txt"
+INITWINDOW = np.array([0,0,0,0,1],dtype = int)
+INITWINDOW.shape = (5,1)
 
 # Makes default Rshift
 def initRShifter():
@@ -52,7 +56,7 @@ def numberToBase(n, b):
         n //= b
     return digits[::-1]
 
-
+# Determinant conditions for shifters (sub matrix det == 0), can be generalized from 2x2 case easily
 def makeDetConds(alphabet = [0,1]):
     windowSize = 4
     windows = it.product(alphabet,repeat = windowSize)
@@ -65,7 +69,7 @@ def makeDetConds(alphabet = [0,1]):
         print(npWindows)
     return(npWindows)
 
-
+# Affine condition on R/D matricies, can be generalized from 2x2 case easily
 def makeConstConds(alphabet = [0,1]):
     windowSize = 2
     windows = it.product(alphabet,repeat = windowSize)
@@ -143,11 +147,16 @@ def makeAllDshifts(alphabet=[0,1]):
 
 
 # Brute force time
-def bruteForceCheck(alphabet = [0,1],windowSize = "2x2", half = False):
+# Checks one at a time if an R/D matrix pair is commutable
+# Later results found symmtry, that is if RnDm = DmRn then RmDn = DnRm. This means we only need to check half the space.
+def bruteForceComCheck(alphabet = [0,1],windowSize = "2x2", half = False):
     allRs = makeAllRshifts(alphabet)
     allDs = makeAllDshifts(alphabet)
-    validShifters = np.zeros((len(allRs),len(allDs)))
-    print(validShifters.shape)
+    print(f"Possible shifters:({len(allRs)},{len(allDs)})")
+    validGraphDs = []
+    validGraphRs = []
+    validDs = []
+    validRs = []
     idxR = 0
     idxD = 0
     idxV = 0
@@ -160,7 +169,8 @@ def bruteForceCheck(alphabet = [0,1],windowSize = "2x2", half = False):
             DR = DR % len(alphabet)
             if half or idxD<=idxR:
                 if np.array_equal(RD,DR):
-                    validShifters[idxR,idxD] = 1
+                    validGraphDs.append(idxD);validGraphRs.append(idxR)
+                    validDs.append(dShift);validRs.append(rShift)
                     outputs.write("Valid pair: \n")
                     outputs.write(f"R shifter:{idxR} \n")
                     np.savetxt(outputs,rShift, fmt = '%d')
@@ -171,9 +181,77 @@ def bruteForceCheck(alphabet = [0,1],windowSize = "2x2", half = False):
         idxD = 0
         idxR += 1
     outputs.write(f"Number of valid shift pairs: {idxV} \n")
-    plt.matshow(validShifters)
-    plt.colorbar()
-    plt.savefig(f"ShiftPairs {windowSize} a{len(alphabet)} Half{not(half)}", dpi=300)
-    return()
+    plt.scatter(validGraphDs, validGraphRs,s=0.5)
+    plt.savefig(f"ShiftPairs {windowSize} a{len(alphabet)} Half{not(half)}.png", dpi=300)
+    plt.xlabel("D Shifters")
+    plt.ylabel("R Shifters")
+    return(validDs,validRs)
 
-bruteForceCheck(ALPHABET,WINDOWSIZE,HALF)
+# given a valid shifter pair, we find R^m = R and D^n = D
+def determinePower(M,maxSize,alphabet,dim):
+    idx = 2
+    I = np.identity(dim)
+    A = np.copy(M)
+    while idx < maxSize:
+        A = A @ M
+        A = A % alphabet
+        if np.array_equal(A,I):
+            break
+        idx += 1
+    if idx == maxSize:
+        return(0)
+    return(idx)
+
+# Gets data from previous program, not really needed
+def pullAllFromText(file,arrayDim = 5):
+    allLines = file.readlines()
+    allRs = []
+    allDs = []
+    block = 2*arrayDim+3 
+    # Gets all the R shifter matricies
+    for idx in range(len(allLines)):
+        newArray = []
+        if idx%block == 2:
+            lines = allLines[idx:idx+arrayDim]
+            for line in lines:
+                newArray.append(line.split())
+            allRs.append(np.array(newArray,dtype = int))
+    # Gets all the D shifter matricies
+    for idx in range(len(allLines)):
+        newArray = []
+        if idx%block == 3+arrayDim:
+            lines = allLines[idx:idx+arrayDim]
+            for line in lines:
+                newArray.append(line.split())
+            allDs.append(np.array(newArray,dtype = int))
+
+    return(allRs,allDs)
+
+def makeDeBT(R,D,n,m,initWindow,alphabetSize):
+    # Generate deBT:
+    firstInRow = np.copy(initWindow)
+    deBT = np.zeros((n,m),dtype=int)
+    for i in range(n):
+        nextInCol = np.copy(firstInRow)
+        for j in range(m):
+            deBT[i,j] = nextInCol[0,0]
+            nextInCol = R @ nextInCol
+            nextInCol = nextInCol % alphabetSize
+        firstInRow = D @ firstInRow
+        firstInRow = firstInRow % alphabetSize
+    return(deBT)
+
+# Determines all commutative shifters
+comDs,comRs = bruteForceComCheck(ALPHABET,WINDOWSIZE,HALF)
+# Now determine powers 
+output = open(OUTPUT,'w')
+for D,R in zip(comDs,comRs): # walks through all valid shifters
+    n = determinePower(R,16,2,5)
+    m = determinePower(D,16,2,5)
+    if m*n == 16: # make general, 16 from binary alphabet on 2x2 window
+        output.write(f"R shifter, power {m}: \n")
+        np.savetxt(output,R, fmt = '%d')
+        output.write(f"D shifter, power {n}: \n")
+        np.savetxt(output,D, fmt = '%d')
+        deBT = makeDeBT(R,D,n,m,INITWINDOW,ALPHABETSIZE)
+        output.writelines(str(deBT)+"\n")
