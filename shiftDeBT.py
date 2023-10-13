@@ -4,7 +4,7 @@ import itertools as it
 VERBOSE = False # Prints out some reporting stats (not implemented properly)
 HALF = False # True -> Use full, False use half (sorry I know this is flipped) it reports correctly though!
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
-ALPHABET = [0,1,2,3] # enumerate alphabet, this is needed for determinant conditions
+ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
 ALPHABETSIZE = len(ALPHABET)
 OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)} Half{not(HALF)}.txt"
 INITWINDOW = np.array([0,0,0,0,1],dtype = int)
@@ -160,6 +160,8 @@ def bruteForceComCheck(alphabet = [0,1],windowSize = "2x2", half = False):
     idxR = 0
     idxD = 0
     idxV = 0
+    temp0 = np.array([0,0,0,0,0],dtype=int)
+    temp1 = np.eye(5,dtype=int)
     outputs = open(f"ShiftPairs {windowSize} a{len(alphabet)} Half{not(half)}.txt","w")
     for rShift in allRs:
         for dShift in allDs:
@@ -167,7 +169,9 @@ def bruteForceComCheck(alphabet = [0,1],windowSize = "2x2", half = False):
             RD = RD % len(alphabet)
             DR = np.matmul(dShift,rShift)
             DR = DR % len(alphabet)
-            if half or idxD<=idxR:
+            special = (rShift-dShift)[:,-1]%2
+            r2d2 = rShift@rShift@dShift@dShift%2
+            if half or idxD<=idxR  and not(np.array_equal(INITWINDOW,r2d2@INITWINDOW%2)) :
                 if np.array_equal(RD,DR):
                     validGraphDs.append(idxD);validGraphRs.append(idxR)
                     validDs.append(dShift);validRs.append(rShift)
@@ -246,8 +250,8 @@ comDs,comRs = bruteForceComCheck(ALPHABET,WINDOWSIZE,HALF)
 # Now determine powers and generate deBT
 output = open(OUTPUT,'w')
 for D,R in zip(comDs,comRs): # walks through all valid shifters
-    n = determinePower(R,16,2,5)
-    m = determinePower(D,16,2,5)
+    n = determinePower(R,81,ALPHABETSIZE,5)
+    m = determinePower(D,81,ALPHABETSIZE,5)
     if m*n == 16: # make general, 16 from binary alphabet on 2x2 window
         output.write(f"R shifter, power {m}: \n")
         np.savetxt(output,R, fmt = '%d')
@@ -255,3 +259,4 @@ for D,R in zip(comDs,comRs): # walks through all valid shifters
         np.savetxt(output,D, fmt = '%d')
         deBT = makeDeBT(R,D,n,m,INITWINDOW,ALPHABETSIZE)
         output.writelines(str(deBT)+"\n")
+        output.writelines(str(R@R@D@D%2)+"\n")

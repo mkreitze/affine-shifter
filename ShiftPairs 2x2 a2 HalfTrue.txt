@@ -1,17 +1,4 @@
 Valid pair: 
-R shifter:15 
-0 0 1 0 0
-0 0 0 1 0
-0 1 1 1 0
-1 0 1 1 1
-0 0 0 0 1
-D shifter:15 
-0 1 0 0 0
-0 1 1 1 0
-0 0 0 1 0
-1 1 0 1 1
-0 0 0 0 1
-Valid pair: 
 R shifter:31 
 0 0 1 0 0
 0 0 0 1 0
@@ -23,45 +10,6 @@ D shifter:15
 0 1 1 1 0
 0 0 0 1 0
 1 1 0 1 1
-0 0 0 0 1
-Valid pair: 
-R shifter:31 
-0 0 1 0 0
-0 0 0 1 0
-0 1 1 1 1
-1 0 1 1 0
-0 0 0 0 1
-D shifter:31 
-0 1 0 0 0
-0 1 1 1 1
-0 0 0 1 0
-1 1 0 1 0
-0 0 0 0 1
-Valid pair: 
-R shifter:47 
-0 0 1 0 0
-0 0 0 1 0
-0 1 1 1 1
-1 0 1 1 1
-0 0 0 0 1
-D shifter:47 
-0 1 0 0 0
-0 1 1 1 1
-0 0 0 1 0
-1 1 0 1 1
-0 0 0 0 1
-Valid pair: 
-R shifter:61 
-0 0 1 0 0
-0 0 0 1 0
-0 1 1 1 0
-1 1 0 1 1
-0 0 0 0 1
-D shifter:61 
-0 1 0 0 0
-0 1 1 1 0
-0 0 0 1 0
-1 0 1 1 1
 0 0 0 0 1
 Valid pair: 
 R shifter:62 
@@ -129,32 +77,6 @@ D shifter:3
 1 1 0 1 1
 0 0 0 0 1
 Valid pair: 
-R shifter:119 
-0 0 1 0 0
-0 0 0 1 0
-1 1 0 1 1
-1 0 1 1 0
-0 0 0 0 1
-D shifter:19 
-0 1 0 0 0
-0 0 1 0 1
-0 0 0 1 0
-1 1 0 1 0
-0 0 0 0 1
-Valid pair: 
-R shifter:123 
-0 0 1 0 0
-0 0 0 1 0
-1 1 1 0 1
-1 0 1 1 0
-0 0 0 0 1
-D shifter:123 
-0 1 0 0 0
-1 1 1 0 1
-0 0 0 1 0
-1 1 0 1 0
-0 0 0 0 1
-Valid pair: 
 R shifter:124 
 0 0 1 0 0
 0 0 0 1 0
@@ -166,19 +88,6 @@ D shifter:51
 0 0 1 0 0
 0 0 0 1 0
 1 1 1 1 1
-0 0 0 0 1
-Valid pair: 
-R shifter:139 
-0 0 1 0 0
-0 0 0 1 0
-1 1 1 0 1
-1 0 1 1 1
-0 0 0 0 1
-D shifter:107 
-0 1 0 0 0
-1 1 1 0 0
-0 0 0 1 0
-1 1 0 1 1
 0 0 0 0 1
 Valid pair: 
 R shifter:176 
@@ -213,19 +122,6 @@ R shifter:176
 1 0 0 0 1
 0 1 0 0 1
 0 0 0 0 1
-D shifter:47 
-0 1 0 0 0
-0 1 1 1 1
-0 0 0 1 0
-1 1 0 1 1
-0 0 0 0 1
-Valid pair: 
-R shifter:176 
-0 0 1 0 0
-0 0 0 1 0
-1 0 0 0 1
-0 1 0 0 1
-0 0 0 0 1
 D shifter:159 
 0 1 0 0 0
 1 1 0 1 0
@@ -244,32 +140,6 @@ D shifter:175
 1 1 0 1 1
 0 0 0 1 0
 0 1 1 1 0
-0 0 0 0 1
-Valid pair: 
-R shifter:176 
-0 0 1 0 0
-0 0 0 1 0
-1 0 0 0 1
-0 1 0 0 1
-0 0 0 0 1
-D shifter:176 
-0 1 0 0 0
-1 0 0 0 1
-0 0 0 1 0
-0 0 1 0 1
-0 0 0 0 1
-Valid pair: 
-R shifter:185 
-0 0 1 0 0
-0 0 0 1 0
-1 0 1 0 1
-0 1 0 1 1
-0 0 0 0 1
-D shifter:48 
-0 1 0 0 0
-0 0 1 0 0
-0 0 0 1 0
-1 0 1 0 1
 0 0 0 0 1
 Valid pair: 
 R shifter:185 
@@ -635,4 +505,4 @@ D shifter:65
 0 0 0 1 0
 1 0 1 1 0
 0 0 0 0 1
-Number of valid shift pairs: 49 
+Number of valid shift pairs: 39 
