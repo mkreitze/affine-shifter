@@ -243,7 +243,7 @@ def makeDeBT(R,D,n,m,initWindow,alphabetSize):
 
 # Determines all commutative shifters
 comDs,comRs = bruteForceComCheck(ALPHABET,WINDOWSIZE,HALF)
-# Now determine powers 
+# Now determine powers and generate deBT
 output = open(OUTPUT,'w')
 for D,R in zip(comDs,comRs): # walks through all valid shifters
     n = determinePower(R,16,2,5)
