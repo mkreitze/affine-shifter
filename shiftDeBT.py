@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
 VERBOSE = False # Prints out some reporting stats (not implemented properly)
-HALF = True # True -> Use full, False use half (sorry I know this is flipped) it reports correctly though!
+RECORDCOMMUTERS = True # Records the DR = RD matricies 
+HALF = False # True -> Use half
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
 ALPHABETSIZE = len(ALPHABET)
-OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)} Half{not(HALF)}.txt"
+OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)} Half{HALF}.txt"
 INITWINDOW = np.array([0,0,0,0,1],dtype = int)
 INITWINDOW.shape = (5,1)
 
@@ -145,51 +146,50 @@ def makeAllDshifts(alphabet=[0,1]):
                 dMats.append(newMat)
     return(dMats)
 
+def makeDRRD(R,D):
+    RD = np.matmul(R,D)
+    RD = RD % ALPHABETSIZE # Makes DR and RD
+    DR = np.matmul(D,R)
+    DR = DR % ALPHABETSIZE
+    return(RD,DR)
 
 # Brute force time
-# Checks one at a time if an R/D matrix pair is commutable
+# Generates all possible R/D shifters
+# Checks if DR = RD ( commutable )
+# Checks for m,n | R^m = D^n = I and m*n = |A|^{windowSize}
+# Checks R^i*D^j != I for all i,j < m,n
+
 # Later results found symmtry, that is if RnDm = DmRn then RmDn = DnRm. This means we only need to check half the space.
-# Also will check 
-def bruteForceComCheck(alphabet = [0,1],windowSize = "2x2", half = False):
-    allRs = makeAllRshifts(alphabet)
-    allDs = makeAllDshifts(alphabet)
-    print(f"Possible shifters:({len(allRs)},{len(allDs)})")
-    validGraphDs = []
-    validGraphRs = []
-    validDs = []
-    validRs = []
-    idxR = 0
-    idxD = 0
-    idxV = 0
-    temp0 = np.array([0,0,0,0,0],dtype=int)
-    temp1 = np.eye(5,dtype=int)
-    outputs = open(f"ShiftPairs {windowSize} a{len(alphabet)} Half{not(half)}.txt","w")
+# Need to check 
+def bruteForceComCheck():
+    allRs = makeAllRshifts(ALPHABET)
+    allDs = makeAllDshifts(ALPHABET)
+    if VERBOSE:
+        print(f"Possible shifters:({len(allRs)},{len(allDs)})") 
+    validGraphDs = [];validGraphRs = []
+    validDs = [];validRs = []
+    idxR = 0;idxD = 0;idxV = 0
+    commuterOutput = open(f"CommuterPairs {WINDOWSIZE} a{ALPHABETSIZE} Half{HALF}.txt","w")
     for rShift in allRs:
         for dShift in allDs:
-            RD = np.matmul(rShift,dShift)
-            RD = RD % len(alphabet)
-            DR = np.matmul(dShift,rShift)
-            DR = DR % len(alphabet)
-            special = (rShift-dShift)[:,-1]%2
-            r2d2 = rShift@rShift@dShift@dShift%2
-            if half or idxD<=idxR  and not(np.array_equal(INITWINDOW,r2d2@INITWINDOW%2)) and not(np.array_equal(special,temp0)):
-                if np.array_equal(RD,DR):
-                    validGraphDs.append(idxD);validGraphRs.append(idxR)
+            if not(HALF) or idxD<=idxR:
+                RD,DR = makeDRRD(rShift,dShift)
+                if np.array_equal(RD,DR): 
+                    if RECORDCOMMUTERS:                    
+                        validGraphDs.append(idxD);validGraphRs.append(idxR)
+                        commuterOutput.write("Valid pair: \n")
+                        commuterOutput.write(f"R shifter:{idxR} \n");np.savetxt(commuterOutput,rShift, fmt = '%d')
+                        commuterOutput.write(f"D shifter:{idxD} \n");np.savetxt(commuterOutput,dShift, fmt = '%d')
                     validDs.append(dShift);validRs.append(rShift)
-                    outputs.write("Valid pair: \n")
-                    outputs.write(f"R shifter:{idxR} \n")
-                    np.savetxt(outputs,rShift, fmt = '%d')
-                    outputs.write(f"D shifter:{idxD} \n")
-                    np.savetxt(outputs,dShift, fmt = '%d')
                     idxV += 1
             idxD += 1
         idxD = 0
         idxR += 1
-    outputs.write(f"Number of valid shift pairs: {idxV} \n")
-    plt.scatter(validGraphDs, validGraphRs,s=0.5)
-    plt.savefig(f"ShiftPairs {windowSize} a{len(alphabet)} Half{not(half)}.png", dpi=300)
-    plt.xlabel("D Shifters")
-    plt.ylabel("R Shifters")
+    if RECORDCOMMUTERS:
+        plt.scatter(validGraphDs, validGraphRs,s=0.5)
+        plt.savefig(f"ShiftPairs {WINDOWSIZE} a{ALPHABETSIZE} Half{HALF}.png", dpi=300)
+        plt.xlabel("D Shifters")
+        plt.ylabel("R Shifters")
     return(validDs,validRs)
 
 # given a valid shifter pair, we find R^m = R and D^n = D
@@ -247,7 +247,7 @@ def makeDeBT(R,D,n,m,initWindow,alphabetSize):
     return(deBT)
 
 # Determines all commutative shifters
-comDs,comRs = bruteForceComCheck(ALPHABET,WINDOWSIZE,HALF)
+comDs,comRs = bruteForceComCheck()
 # Now determine powers and generate deBT
 output = open(OUTPUT,'w')
 for D,R in zip(comDs,comRs): # walks through all valid shifters
