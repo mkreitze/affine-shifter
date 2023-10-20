@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
 VERBOSE = False # Prints out some reporting stats (not implemented properly)
-HALF = False # True -> Use full, False use half (sorry I know this is flipped) it reports correctly though!
+HALF = True # True -> Use full, False use half (sorry I know this is flipped) it reports correctly though!
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
 ALPHABETSIZE = len(ALPHABET)
@@ -149,6 +149,7 @@ def makeAllDshifts(alphabet=[0,1]):
 # Brute force time
 # Checks one at a time if an R/D matrix pair is commutable
 # Later results found symmtry, that is if RnDm = DmRn then RmDn = DnRm. This means we only need to check half the space.
+# Also will check 
 def bruteForceComCheck(alphabet = [0,1],windowSize = "2x2", half = False):
     allRs = makeAllRshifts(alphabet)
     allDs = makeAllDshifts(alphabet)
@@ -171,7 +172,7 @@ def bruteForceComCheck(alphabet = [0,1],windowSize = "2x2", half = False):
             DR = DR % len(alphabet)
             special = (rShift-dShift)[:,-1]%2
             r2d2 = rShift@rShift@dShift@dShift%2
-            if half or idxD<=idxR  and not(np.array_equal(INITWINDOW,r2d2@INITWINDOW%2)) :
+            if half or idxD<=idxR  and not(np.array_equal(INITWINDOW,r2d2@INITWINDOW%2)) and not(np.array_equal(special,temp0)):
                 if np.array_equal(RD,DR):
                     validGraphDs.append(idxD);validGraphRs.append(idxR)
                     validDs.append(dShift);validRs.append(rShift)
