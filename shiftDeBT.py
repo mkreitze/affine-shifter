@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
 VERBOSE = False # Prints out some reporting stats (not implemented properly)
-RECORDCOMMUTERS = True # Records the DR = RD matricies 
+REPORT = True # Records the DR = RD matricies 
+PLOT = True
 HALF = True # True -> Use half
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
@@ -48,7 +49,7 @@ def sanityCheck():
         print(True)
 
 # Thank you https://stackoverflow.com/questions/2267362/how-to-convert-an-integer-to-a-string-in-any-base/28666223#28666223
-# Actually cant use this nvm 
+# Use this in the future
 def numberToBase(n, b):
     if n == 0:
         return [0]
@@ -58,7 +59,8 @@ def numberToBase(n, b):
         n //= b
     return digits[::-1]
 
-# Determinant conditions for shifters (sub matrix det == 0), can be generalized from 2x2 case easily
+# Determinant conditions for shifters (sub matrix det == 0), currently for arbtirary alphabet on the 2x2 case 
+# Should be able to generalize from 2x2 window case
 def makeDetConds(alphabet = [0,1]):
     windowSize = 4
     windows = it.product(alphabet,repeat = windowSize)
@@ -71,7 +73,8 @@ def makeDetConds(alphabet = [0,1]):
         print(npWindows)
     return(npWindows)
 
-# Affine condition on R/D matricies, can be generalized from 2x2 case easily
+# Affine condition on R/D matricies, currently for arbitrary alphabet on the 2x2 case
+# Should be able to generalize from 2x2 window case easily
 def makeConstConds(alphabet = [0,1]):
     windowSize = 2
     windows = it.product(alphabet,repeat = windowSize)
@@ -90,8 +93,8 @@ def makeConstConds(alphabet = [0,1]):
 def makeAllRshifts(alphabet = [0,1]):
     rMats = []
     rMat = initRShifter()
-    detConditions = makeDetConds(alphabet)
-    consistConditions = makeConstConds(alphabet)
+    detConditions = makeDetConds(alphabet) #pre-calcs valid det = 0 possibilities
+    consistConditions = makeConstConds(alphabet) #pre-calcs valid 0 col possiblities
     # resolve r31 r42 r41 r32
     for a in range(detConditions.shape[0]): 
         rMat[2,0] = detConditions[a,0]
@@ -103,7 +106,7 @@ def makeAllRshifts(alphabet = [0,1]):
             rMat[2,4] = consistConditions[b,0]
             rMat[3,4] = consistConditions[b,1]
             # resolve r33 r34 r43 r44
-            for c in range(2**4): #size 2 alphabet, 4 unresolved entries
+            for c in range(ALPHABETSIZE**NUMOFCELLS): #using global variables, sue me 
                 binC = "{0:b}".format(c)
                 binC = (4-len(binC))*"0" + binC # resolves not enough digits 
                 rMat[2,2] = int(binC[0])  
@@ -121,11 +124,8 @@ def makeAllRshifts(alphabet = [0,1]):
 def makeAllDshifts(alphabet=[0,1]):
     dMats = []
     dMat = initDShifter()
-    detConditions = makeDetConds(alphabet)
-    consistConditions = makeConstConds(alphabet)
-    # detConditions = np.matrix([[0,0,1,1],[0,1,1,1],[1,0,1,1],[1,1,0,0],[1,1,0,1],[1,1,1,0],]) # listed in binary smallest to largest to make pattern apparent later
-    # consistConditions = np.matrix([[0,1],[1,0],[1,1]])
-    # resolve  d21 d43 d41 d23
+    detConditions = makeDetConds(alphabet) #pre-calcs possibilities
+    consistConditions = makeConstConds(alphabet) 
     for a in range(detConditions.shape[0]): 
         dMat[1,0] = detConditions[a,0]
         dMat[3,2] = detConditions[a,1]
@@ -136,7 +136,7 @@ def makeAllDshifts(alphabet=[0,1]):
             dMat[1,4] = consistConditions[b,0]
             dMat[3,4] = consistConditions[b,1]
             # resolve d22 d24 d42 d44
-            for c in range(2**4): #size 2 alphabet, 4 unresolved entries
+            for c in range(ALPHABETSIZE**NUMOFCELLS): #using global variables, sue me 
                 binC = "{0:b}".format(c)
                 binC = (4-len(binC))*"0" + binC # resolves not enough digits 
                 dMat[1,1] = int(binC[0])  
@@ -147,37 +147,7 @@ def makeAllDshifts(alphabet=[0,1]):
                 dMats.append(newMat)
     return(dMats)
 
-def makeDRRD(R,D):
-    RD = np.matmul(R,D)
-    RD = RD % ALPHABETSIZE # Makes DR and RD
-    DR = np.matmul(D,R)
-    DR = DR % ALPHABETSIZE
-    return(RD,DR)
-
-def checkCrossPowers(R,D,m,n):
-    tempR = np.copy(R)
-    tempD = np.copy(D)
-    for i in range(m):
-        for j in range(n):
-            if np.array_equal(tempR,tempD): # Checks if R^i 
-                return(False)
-        tempD = D@tempD
-    tempR = R@tempR
-    tempR = np.copy(R)
-    tempD = np.copy(D)
-    for j in range(n):
-        for i in range(m):
-            if np.array_equal(tempR,tempD): # Checks if R^i 
-                return(False)
-        tempR = R@tempR
-    tempD = D@tempD
-    return(True) # if it fails to find any equalities then we report true, as it succeeded. 
-
 # Brute force time
-# Generates all possible R/D shifters
-# Checks if DR = RD ( commutable )
-# Checks for m,n | R^m = D^n = I and m*n = |A|^{windowSize}
-# Checks R^i*D^j != I for all i,j < m,n
 
 # Later results found symmtry, that is if RnDm = DmRn then RmDn = DnRm. This means we only need to check half the space.
 # Need to check 
@@ -188,56 +158,28 @@ def bruteForceComCheck():
         print(f"Possible shifters:({len(allRs)},{len(allDs)})") 
     validDs = [];validRs = []
     idxR = 0;idxD = 0;idxV = 0
-    if RECORDCOMMUTERS:
-        commuteGraphDs = [];commuteGraphRs = []
-        commuterOutput = open(f"CommuterPairs {WINDOWSIZE} a{ALPHABETSIZE} Half{HALF}.txt","w")
     output = open(OUTPUT,'w')
     for rShift in allRs:
         for dShift in allDs:
-            if not(HALF) or idxD<=idxR:
-                RD,DR = makeDRRD(rShift,dShift) # Checks if they commute
-                if np.array_equal(RD,DR): 
-                    if RECORDCOMMUTERS:                    
-                        commuteGraphDs.append(idxD);commuteGraphRs.append(idxR)
-                        commuterOutput.write("Valid pair: \n")
-                        commuterOutput.write(f"R shifter:{idxR} \n");np.savetxt(commuterOutput,rShift, fmt = '%d')
-                        commuterOutput.write(f"D shifter:{idxD} \n");np.savetxt(commuterOutput,dShift, fmt = '%d')
-                    n = determinePower(rShift,ALPHABETSIZE**NUMOFCELLS,ALPHABETSIZE,NUMOFCELLS+1)
-                    m = determinePower(dShift,ALPHABETSIZE**NUMOFCELLS,ALPHABETSIZE,NUMOFCELLS+1)
-                    if m*n == ALPHABETSIZE**NUMOFCELLS: # Checks if powers are valid
-                        if checkCrossPowers(rShift,dShift,m,n): # Checks if cross powers, R^i != D^j for all i,j
-                            output.write(f"R shifter, power {m}: \n")
-                            np.savetxt(output,rShift, fmt = '%d')
-                            output.write(f"D shifter, power {n}: \n")
-                            np.savetxt(output,dShift, fmt = '%d')
-                            deBT = makeDeBT(rShift,dShift,n,m,INITWINDOW,ALPHABETSIZE)
-                            output.writelines(str(deBT)+"\n")
-                    validDs.append(dShift);validRs.append(rShift)
-                    idxV += 1
+            # if checks:
+            #     if REPORT:
+            #         output.write(f"R shifter, power {m}: \n")
+            #         np.savetxt(output,rShift, fmt = '%d')
+            #         output.write(f"D shifter, power {n}: \n")
+            #         np.savetxt(output,dShift, fmt = '%d')
+            #     deBT = makeDeBT(rShift,dShift,n,m,INITWINDOW,ALPHABETSIZE)
+            #     output.writelines(str(deBT)+"\n")
+            #     validDs.append(dShift);validRs.append(rShift)
+                idxV += 1
             idxD += 1
         idxD = 0
         idxR += 1
-    if RECORDCOMMUTERS:
-        plt.scatter(commuteGraphDs, commuteGraphRs,s=0.5)
-        plt.savefig(f"ShiftPairs {WINDOWSIZE} a{ALPHABETSIZE} Half{HALF}.png", dpi=300)
-        plt.xlabel("D Shifters")
-        plt.ylabel("R Shifters")
+    if PLOT:
+        # plt.scatter(commuteGraphDs, commuteGraphRs,s=0.5)
+        # plt.savefig(f"ShiftPairs {WINDOWSIZE} a{ALPHABETSIZE} Half{HALF}.png", dpi=300)
+        # plt.xlabel("D Shifters")
+        # plt.ylabel("R Shifters")
     return(validDs,validRs)
-
-# given a valid shifter pair, we find R^m = R and D^n = D
-def determinePower(M,maxSize,alphabet,dim):
-    idx = 2
-    I = np.identity(dim)
-    A = np.copy(M)
-    while idx < maxSize:
-        A = A @ M
-        A = A % alphabet
-        if np.array_equal(A,I):
-            break
-        idx += 1
-    if idx == maxSize:
-        return(0)
-    return(idx)
 
 # Gets data from previous program, not really needed
 def pullAllFromText(file,arrayDim = 5):
