@@ -154,16 +154,19 @@ def makeAllDshifts(alphabet=[0,1]):
 # Determines m | M^m = I
 # Used for both R and D shifters
 def determinePower(M,maxSize,alphabetSize,dim):
+    powRec = [] #records all the powers... useful for later
+    powRec.append(np.copy(M))
     N = np.copy(M)
     I = np.eye(dim)
     for i in range(maxSize):
         N = N @ M
         N = N % alphabetSize
+        powRec.append(np.copy(N))
         if np.array_equal(N,I):
-            return(i+2) # +2, we start at 0 but in reality i = 0 produces the 2nd power
-    return(0)
+            return(i+2,powRec) # +2, we start at 0 but in reality i = 0 produces the 2nd power
+    return(0,[])
 
-
+# Generates a deBT from a pair of R,D shifters. Note you need to give the dimension
 def makeDeBT(R,D,n,m,initWindow,alphabetSize):
     # Generate deBT:
     firstInRow = np.copy(initWindow)
@@ -178,48 +181,66 @@ def makeDeBT(R,D,n,m,initWindow,alphabetSize):
         firstInRow = firstInRow % alphabetSize
     return(deBT)
 
+
+def checkCrossTerms(rPows,dPows,alphabetSize):
+    for rP in rPows:
+        for dP in dPows:
+            det = np.linalg.det(rP-dP)
+            det = det % alphabetSize 
+            if (det == 0):
+                return(False)
+    return(True)
 # Brute force checking
 # Walk through all possible  
-def bruteForceSearch(maxSize,dim,alphabet,alphabetSize):
+def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
     allRs = makeAllRshifts(alphabet)
     allDs = makeAllDshifts(alphabet)
     # by defintion the lists that sort by power include 0, this is the 'trash' that cannot make deBT as their power is bigger than max.
     rPows = [[] for i in range(maxSize+1)]; dPows = [[] for i in range(maxSize+1)]
+    rPowsRecs = [[] for i in range(maxSize+1)]; dPowsRecs = [[] for i in range(maxSize+1)]
     if REPORT:
         output = open(f"{OUTPUT}.txt","w")
 
-    validShifters = [[],[],[],[]]
+    validShifters = [[],[],[],[]] # stores as R matrix, D matrix, R^m = I power, D^n = I power
     # Sort by the shifters by their cyclic powers
     for rShift in allRs:
-        i = determinePower(rShift,maxSize,alphabetSize,dim)
+        i,rec = determinePower(rShift,maxSize,alphabetSize,dim)
         rPows[i].append(rShift)
+        rPowsRecs[i].append(rec)
     for dShift in allDs:
-        i = determinePower(dShift,maxSize,alphabetSize,dim)
+        i,rec = determinePower(dShift,maxSize,alphabetSize,dim)
         dPows[i].append(dShift)
-    # Check for commutability 
+        dPowsRecs[i].append(rec)
+    # Check for commutability
+    # This is done smartly, only R/D matrix pairs which can even make tori are considered
     for i in range(maxSize-1):
         i = i+1
         j = math.floor(maxSize/i)
         if i > j:
             break
         if i*j == maxSize:
+            idx1=0
             for R in rPows[i]:
+                idx1+=1
+                idx2=0
                 for D in dPows[j]:
+                    idx2+=1
                     RD = (R @ D) % alphabetSize
                     DR = (D @ R) % alphabetSize
                     if np.array_equal(RD,DR):
-                        validShifters[0].append(R)
-                        validShifters[1].append(D)
-                        validShifters[2].append(i)
-                        validShifters[3].append(j)       
-                    if REPORT:
-                        output.write(f"Valid pair, dimension {i} x {j} \n")
-                        output.write(str(R))
-                        output.write('\n')
-                        output.write(str(D))
-                        output.write('\n')
-                        output.write(str(makeDeBT(R,D,i,j,INITWINDOW,ALPHABETSIZE)))
-                        output.write('\n')                        
+                        if checkCrossTerms(rPowsRecs[i][idx1],dPowsRecs[j][idx2],alphabetSize):
+                            validShifters[0].append(R)
+                            validShifters[1].append(D)
+                            validShifters[2].append(i)
+                            validShifters[3].append(j)       
+                            if REPORT:
+                                output.write(f"Valid pair, dimension {i} x {j} \n")
+                                output.write(str(R))
+                                output.write('\n')
+                                output.write(str(D))
+                                output.write('\n')
+                                output.write(str(makeDeBT(R,D,i,j,initWindow,alphabetSize)))
+                                output.write('\n')
     return()
     
 
@@ -253,5 +274,5 @@ def pullAllFromText(file,arrayDim = 5):
 # Determines all commutative shifters
 maxToriSize = ALPHABETSIZE**NUMOFCELLS
 shifterDimension = NUMOFCELLS+1
-bruteForceSearch(maxToriSize,shifterDimension,ALPHABET,ALPHABETSIZE)
+bruteForceSearch(maxToriSize,shifterDimension,ALPHABET,ALPHABETSIZE,INITWINDOW)
 # Now determine powers and generate deBT
