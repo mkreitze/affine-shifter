@@ -107,8 +107,10 @@ def makeAllRshifts(alphabet = [0,1]):
             rMat[3,4] = consistConditions[b,1]
             # resolve r33 r34 r43 r44
             for c in range(ALPHABETSIZE**NUMOFCELLS): #using global variables, sue me 
-                binC = "{0:b}".format(c)
-                binC = (4-len(binC))*"0" + binC # resolves not enough digits 
+                # binC = "{0:b}".format(c)
+                # binC = (4-len(binC))*"0" + binC # resolves not enough digits 
+                binC = np.base_repr(c,ALPHABETSIZE)
+                binC = (4-len(binC))*"0" + binC # resolves not enough digits                 
                 rMat[2,2] = int(binC[0])  
                 rMat[2,3] = int(binC[1])
                 rMat[3,2] = int(binC[2])
@@ -137,8 +139,10 @@ def makeAllDshifts(alphabet=[0,1]):
             dMat[3,4] = consistConditions[b,1]
             # resolve d22 d24 d42 d44
             for c in range(ALPHABETSIZE**NUMOFCELLS): #using global variables, sue me 
-                binC = "{0:b}".format(c)
-                binC = (4-len(binC))*"0" + binC # resolves not enough digits 
+                # binC = "{0:b}".format(c)
+                # binC = (4-len(binC))*"0" + binC # resolves not enough digits 
+                binC = np.base_repr(c,ALPHABETSIZE)
+                binC = (4-len(binC))*"0" + binC # resolves not enough digits                 
                 dMat[1,1] = int(binC[0])  
                 dMat[1,3] = int(binC[1])
                 dMat[3,1] = int(binC[2])
