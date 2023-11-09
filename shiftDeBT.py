@@ -1,15 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
+import math
 VERBOSE = False # Prints out some reporting stats (not implemented properly)
 REPORT = True # Records the DR = RD matricies 
 PLOT = True
-HALF = True # True -> Use half
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
 ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
 ALPHABETSIZE = len(ALPHABET)
-OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)} Half{HALF}.txt"
+OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)}.txt"
 INITWINDOW = np.array([0,0,0,0,1],dtype = int)
 INITWINDOW.shape = (5,1)
 
@@ -89,7 +89,7 @@ def makeConstConds(alphabet = [0,1]):
 
 
 # Makes all the Rshifts and put them to a list
-# There must be a better way to enumerate all possible matricies. Must think for future cases
+# There must be a better way to enumerate all possible matricies. Currently just go through all possibilities in binary
 def makeAllRshifts(alphabet = [0,1]):
     rMats = []
     rMat = initRShifter()
@@ -107,12 +107,12 @@ def makeAllRshifts(alphabet = [0,1]):
             rMat[3,4] = consistConditions[b,1]
             # resolve r33 r34 r43 r44
             for c in range(ALPHABETSIZE**NUMOFCELLS): #using global variables, sue me 
-                binC = "{0:b}".format(c)
-                binC = (4-len(binC))*"0" + binC # resolves not enough digits 
-                rMat[2,2] = int(binC[0])  
-                rMat[2,3] = int(binC[1])
-                rMat[3,2] = int(binC[2])
-                rMat[3,3] = int(binC[3])
+                baseC = np.base_repr(c,ALPHABETSIZE)
+                baseC = (4-len(baseC))*"0" + baseC # resolves not enough digits 
+                rMat[1,1] = int(baseC[0])  
+                rMat[1,3] = int(baseC[1])
+                rMat[3,1] = int(baseC[2])
+                rMat[3,3] = int(baseC[3])
                 newMat = np.copy(rMat)
                 rMats.append(newMat)
     return(rMats)
@@ -120,7 +120,7 @@ def makeAllRshifts(alphabet = [0,1]):
     
 
 # Makes all the Dshifts and put them to a list
-# There must be a better way to enumerate all possible matricies. Must think for future cases
+# There must be a better way to enumerate all possible matricies. 
 def makeAllDshifts(alphabet=[0,1]):
     dMats = []
     dMat = initDShifter()
@@ -137,49 +137,87 @@ def makeAllDshifts(alphabet=[0,1]):
             dMat[3,4] = consistConditions[b,1]
             # resolve d22 d24 d42 d44
             for c in range(ALPHABETSIZE**NUMOFCELLS): #using global variables, sue me 
-                binC = "{0:b}".format(c)
-                binC = (4-len(binC))*"0" + binC # resolves not enough digits 
-                dMat[1,1] = int(binC[0])  
-                dMat[1,3] = int(binC[1])
-                dMat[3,1] = int(binC[2])
-                dMat[3,3] = int(binC[3])
+                baseC = np.base_repr(c,ALPHABETSIZE)
+                baseC = (4-len(baseC))*"0" + baseC # resolves not enough digits 
+                dMat[1,1] = int(baseC[0])  
+                dMat[1,3] = int(baseC[1])
+                dMat[3,1] = int(baseC[2])
+                dMat[3,3] = int(baseC[3])
                 newMat = np.copy(dMat)
                 dMats.append(newMat)
     return(dMats)
 
-# Brute force time
+# Determines m | M^m = I
+# Used for both R and D shifters
+def determinePower(M,maxSize,alphabetSize,dim):
+    N = np.copy(M)
+    I = np.eye(dim)
+    for i in range(maxSize):
+        N = N @ M
+        N = N % alphabetSize
+        if np.array_equal(N,I):
+            return(i+2) # +2, we start at 0 but in reality i = 0 produces the 2nd power
+    return(0)
 
-# Later results found symmtry, that is if RnDm = DmRn then RmDn = DnRm. This means we only need to check half the space.
-# Need to check 
-def bruteForceComCheck():
-    allRs = makeAllRshifts(ALPHABET)
-    allDs = makeAllDshifts(ALPHABET)
-    if VERBOSE:
-        print(f"Possible shifters:({len(allRs)},{len(allDs)})") 
-    validDs = [];validRs = []
-    idxR = 0;idxD = 0;idxV = 0
-    output = open(OUTPUT,'w')
+
+def makeDeBT(R,D,n,m,initWindow,alphabetSize):
+    # Generate deBT:
+    firstInRow = np.copy(initWindow)
+    deBT = np.zeros((n,m),dtype=int)
+    for i in range(n):
+        nextInCol = np.copy(firstInRow)
+        for j in range(m):
+            deBT[i,j] = nextInCol[0,0]
+            nextInCol = R @ nextInCol
+            nextInCol = nextInCol % alphabetSize
+        firstInRow = D @ firstInRow
+        firstInRow = firstInRow % alphabetSize
+    return(deBT)
+
+# Brute force checking
+# Walk through all possible  
+def bruteForceSearch(maxSize,dim,alphabet,alphabetSize):
+    allRs = makeAllRshifts(alphabet)
+    allDs = makeAllDshifts(alphabet)
+    # by defintion the lists that sort by power include 0, this is the 'trash' that cannot make deBT as their power is bigger than max.
+    rPows = [[] for i in range(maxSize+1)]; dPows = [[] for i in range(maxSize+1)]
+    if REPORT:
+        output = open(f"{OUTPUT}.txt","w")
+
+    validShifters = [[],[],[],[]]
+    # Sort by the shifters by their cyclic powers
     for rShift in allRs:
-        for dShift in allDs:
-            # if checks:
-            #     if REPORT:
-            #         output.write(f"R shifter, power {m}: \n")
-            #         np.savetxt(output,rShift, fmt = '%d')
-            #         output.write(f"D shifter, power {n}: \n")
-            #         np.savetxt(output,dShift, fmt = '%d')
-            #     deBT = makeDeBT(rShift,dShift,n,m,INITWINDOW,ALPHABETSIZE)
-            #     output.writelines(str(deBT)+"\n")
-            #     validDs.append(dShift);validRs.append(rShift)
-                idxV += 1
-            idxD += 1
-        idxD = 0
-        idxR += 1
-    if PLOT:
-        # plt.scatter(commuteGraphDs, commuteGraphRs,s=0.5)
-        # plt.savefig(f"ShiftPairs {WINDOWSIZE} a{ALPHABETSIZE} Half{HALF}.png", dpi=300)
-        # plt.xlabel("D Shifters")
-        # plt.ylabel("R Shifters")
-    return(validDs,validRs)
+        i = determinePower(rShift,maxSize,alphabetSize,dim)
+        rPows[i].append(rShift)
+    for dShift in allDs:
+        i = determinePower(dShift,maxSize,alphabetSize,dim)
+        dPows[i].append(dShift)
+    # Check for commutability 
+    for i in range(maxSize-1):
+        i = i+1
+        j = math.floor(maxSize/i)
+        if i > j:
+            break
+        if i*j == maxSize:
+            for R in rPows[i]:
+                for D in dPows[j]:
+                    RD = (R @ D) % alphabetSize
+                    DR = (D @ R) % alphabetSize
+                    if np.array_equal(RD,DR):
+                        validShifters[0].append(R)
+                        validShifters[1].append(D)
+                        validShifters[2].append(i)
+                        validShifters[3].append(j)       
+                        if REPORT:
+                            output.write(f"Valid pair, dimension {i} x {j} \n")
+                            output.write(str(R))
+                            output.write('\n')
+                            output.write(str(D))
+                            output.write('\n')
+                            output.write(str(makeDeBT(R,D,i,j,INITWINDOW,ALPHABETSIZE)))
+                            output.write('\n')
+    return()
+    
 
 # Gets data from previous program, not really needed
 def pullAllFromText(file,arrayDim = 5):
@@ -206,32 +244,10 @@ def pullAllFromText(file,arrayDim = 5):
 
     return(allRs,allDs)
 
-def makeDeBT(R,D,n,m,initWindow,alphabetSize):
-    # Generate deBT:
-    firstInRow = np.copy(initWindow)
-    deBT = np.zeros((n,m),dtype=int)
-    for i in range(n):
-        nextInCol = np.copy(firstInRow)
-        for j in range(m):
-            deBT[i,j] = nextInCol[0,0]
-            nextInCol = R @ nextInCol
-            nextInCol = nextInCol % alphabetSize
-        firstInRow = D @ firstInRow
-        firstInRow = firstInRow % alphabetSize
-    return(deBT)
+
 
 # Determines all commutative shifters
-comDs,comRs = bruteForceComCheck()
+maxToriSize = ALPHABETSIZE**NUMOFCELLS
+shifterDimension = NUMOFCELLS+1
+bruteForceSearch(maxToriSize,shifterDimension,ALPHABET,ALPHABETSIZE)
 # Now determine powers and generate deBT
-output = open(OUTPUT,'w')
-for D,R in zip(comDs,comRs): # walks through all valid shifters
-    n = determinePower(R,81,ALPHABETSIZE,5)
-    m = determinePower(D,81,ALPHABETSIZE,5)
-    if m*n == 16: # make general, 16 from binary alphabet on 2x2 window
-        output.write(f"R shifter, power {m}: \n")
-        np.savetxt(output,R, fmt = '%d')
-        output.write(f"D shifter, power {n}: \n")
-        np.savetxt(output,D, fmt = '%d')
-        deBT = makeDeBT(R,D,n,m,INITWINDOW,ALPHABETSIZE)
-        output.writelines(str(deBT)+"\n")
-        output.writelines(str(R@R@D@D%2)+"\n")
