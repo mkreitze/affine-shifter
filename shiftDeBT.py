@@ -107,12 +107,12 @@ def makeAllRshifts(alphabet = [0,1]):
             rMat[3,4] = consistConditions[b,1]
             # resolve r33 r34 r43 r44
             for c in range(ALPHABETSIZE**NUMOFCELLS): #using global variables, sue me 
-                baseC = np.base_repr(c,ALPHABETSIZE)
-                baseC = (4-len(baseC))*"0" + baseC # resolves not enough digits 
-                rMat[1,1] = int(baseC[0])  
-                rMat[1,3] = int(baseC[1])
-                rMat[3,1] = int(baseC[2])
-                rMat[3,3] = int(baseC[3])
+                binC = "{0:b}".format(c)
+                binC = (4-len(binC))*"0" + binC # resolves not enough digits 
+                rMat[2,2] = int(binC[0])  
+                rMat[2,3] = int(binC[1])
+                rMat[3,2] = int(binC[2])
+                rMat[3,3] = int(binC[3])
                 newMat = np.copy(rMat)
                 rMats.append(newMat)
     return(rMats)
@@ -120,7 +120,7 @@ def makeAllRshifts(alphabet = [0,1]):
     
 
 # Makes all the Dshifts and put them to a list
-# There must be a better way to enumerate all possible matricies. 
+# There must be a better way to enumerate all possible matricies. Currently just go through all possibilities in binary
 def makeAllDshifts(alphabet=[0,1]):
     dMats = []
     dMat = initDShifter()
@@ -137,12 +137,12 @@ def makeAllDshifts(alphabet=[0,1]):
             dMat[3,4] = consistConditions[b,1]
             # resolve d22 d24 d42 d44
             for c in range(ALPHABETSIZE**NUMOFCELLS): #using global variables, sue me 
-                baseC = np.base_repr(c,ALPHABETSIZE)
-                baseC = (4-len(baseC))*"0" + baseC # resolves not enough digits 
-                dMat[1,1] = int(baseC[0])  
-                dMat[1,3] = int(baseC[1])
-                dMat[3,1] = int(baseC[2])
-                dMat[3,3] = int(baseC[3])
+                binC = "{0:b}".format(c)
+                binC = (4-len(binC))*"0" + binC # resolves not enough digits 
+                dMat[1,1] = int(binC[0])  
+                dMat[1,3] = int(binC[1])
+                dMat[3,1] = int(binC[2])
+                dMat[3,3] = int(binC[3])
                 newMat = np.copy(dMat)
                 dMats.append(newMat)
     return(dMats)
@@ -208,14 +208,14 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize):
                         validShifters[1].append(D)
                         validShifters[2].append(i)
                         validShifters[3].append(j)       
-                        if REPORT:
-                            output.write(f"Valid pair, dimension {i} x {j} \n")
-                            output.write(str(R))
-                            output.write('\n')
-                            output.write(str(D))
-                            output.write('\n')
-                            output.write(str(makeDeBT(R,D,i,j,INITWINDOW,ALPHABETSIZE)))
-                            output.write('\n')
+                    if REPORT:
+                        output.write(f"Valid pair, dimension {i} x {j} \n")
+                        output.write(str(R))
+                        output.write('\n')
+                        output.write(str(D))
+                        output.write('\n')
+                        output.write(str(makeDeBT(R,D,i,j,INITWINDOW,ALPHABETSIZE)))
+                        output.write('\n')                        
     return()
     
 
