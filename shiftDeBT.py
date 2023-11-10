@@ -161,9 +161,9 @@ def determinePower(M,maxSize,alphabetSize,dim):
     for i in range(maxSize):
         N = N @ M
         N = N % alphabetSize
-        powRec.append(np.copy(N))
         if np.array_equal(N,I):
             return(i+2,powRec) # +2, we start at 0 but in reality i = 0 produces the 2nd power
+        powRec.append(np.copy(N))
     return(0,[])
 
 # Generates a deBT from a pair of R,D shifters. Note you need to give the dimension
@@ -183,11 +183,13 @@ def makeDeBT(R,D,n,m,initWindow,alphabetSize):
 
 
 def checkCrossTerms(rPows,dPows,alphabetSize):
+    I = np.eye(5)
     for rP in rPows:
         for dP in dPows:
-            det = np.linalg.det(rP-dP)
+            temp = (rP - dP) % alphabetSize
+            det = np.linalg.det(temp)
             det = det % alphabetSize 
-            if (det == 0):
+            if (det != 0):
                 return(False)
     return(True)
 # Brute force checking
@@ -228,7 +230,7 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
                     RD = (R @ D) % alphabetSize
                     DR = (D @ R) % alphabetSize
                     if np.array_equal(RD,DR):
-                        if checkCrossTerms(rPowsRecs[i][idx1],dPowsRecs[j][idx2],alphabetSize):
+                         if checkCrossTerms(rPowsRecs[i][idx1],dPowsRecs[j][idx2],alphabetSize):
                             validShifters[0].append(R)
                             validShifters[1].append(D)
                             validShifters[2].append(i)
