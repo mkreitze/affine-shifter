@@ -1,13 +1,14 @@
 import numpy as np
+import sympy as sy
 import matplotlib.pyplot as plt
 import itertools as it
-import math
+import math as m
 VERBOSE = False # Prints out some reporting stats (not implemented properly)
 REPORT = True # Records the DR = RD matricies 
 PLOT = True
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
-ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
+ALPHABET = [0,1,2,3] # enumerate alphabet, this is needed for determinant conditions
 ALPHABETSIZE = len(ALPHABET)
 OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)}.txt"
 INITWINDOW = np.array([0,0,0,0,1],dtype = int)
@@ -47,17 +48,6 @@ def sanityCheck():
     print(b)
     if np.array_equal(a,b) == True:
         print(True)
-
-# Thank you https://stackoverflow.com/questions/2267362/how-to-convert-an-integer-to-a-string-in-any-base/28666223#28666223
-# Use this in the future
-def numberToBase(n, b):
-    if n == 0:
-        return [0]
-    digits = []
-    while n:
-        digits.append(int(n % b))
-        n //= b
-    return digits[::-1]
 
 # Determinant conditions for shifters (sub matrix det == 0), currently for arbtirary alphabet on the 2x2 case 
 # Should be able to generalize from 2x2 window case
@@ -181,9 +171,12 @@ def makeDeBT(R,D,n,m,initWindow,alphabetSize):
         firstInRow = firstInRow % alphabetSize
     return(deBT)
 
+# Stolen from user Sublow at https://stackoverflow.com/questions/47064885/list-all-factors-of-number
+def factorize(num):
+    return [n for n in range(1, num + 1) if num % n == 0]
 
 # Incorrect method det(R^i - D^j) != 0 
-def checkCrossTermsBad(rPows,dPows,alphabetSize):
+def checkCrossTermsOld(rPows,dPows,alphabetSize):
     I = np.eye(5)
     for rP in rPows:
         for dP in dPows:
@@ -196,16 +189,32 @@ def checkCrossTermsBad(rPows,dPows,alphabetSize):
 
 
 # Instead checking rank(Ab) = rank(A) + 1 (therefore we have no lin dep on b)
-def checkCrossTerms(rPows,dPows,alphabetSize):
+def checkCrossTermsBad(rPows,dPows,alphabetSize):
     dims = np.shape(rPows[0][0])
     dimAb = dims[0]-1;dimA = dims[0]-2  # for readability
     I = np.eye(5)
     for rP in rPows:
         for dP in dPows:
-            temp = (rP - dP) % alphabetSize
-            rankAb = (np.linalg.matrix_rank(temp[0:dimAb][0:dimAb]))
-            rankA = (np.linalg.matrix_rank(temp[0:dimA][0:dimA])) 
+            temp = (rP-dP) % alphabetSize
+            rankAb = (np.linalg.matrix_rank(temp[0:dimAb,0:dimAb]))
+            rankA = (np.linalg.matrix_rank(temp[0:dimA,0:dimA])) 
             if (rankAb == rankA + 1):
+                return(False)
+    return(True)
+
+# Instead checking rank(Ab) = rank(A) + 1 (therefore we have no lin dep on b)
+def checkCrossTerms(rPows,dPows,alphabetSize):
+    dims = np.shape(rPows[0][0])
+    dimAb = dims[0]-1 # for readability
+    I = np.eye(5)
+    for rP in rPows:
+        for dP in dPows:
+            temp = (rP-dP) % alphabetSize
+            Ab = sy.Matrix(temp[0:4,0:4])
+            rREF = Ab.rref()
+            A = sy.Matrix(temp[0:3,0:3])
+            rREF2 = A.rref()
+            if (len(rREF[1]) == len(rREF2[1]) + 1):
                 return(False)
     return(True)
 
@@ -219,7 +228,7 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
     rPows = [[] for i in range(maxSize+1)]; dPows = [[] for i in range(maxSize+1)]
     rPowsRecs = [[] for i in range(maxSize+1)]; dPowsRecs = [[] for i in range(maxSize+1)]
     if REPORT:
-        output = open(f"{OUTPUT}.txt","w")
+        output = open(f"{OUTPUT}","w")
 
     validShifters = [[],[],[],[]] # stores as R matrix, D matrix, R^m = I power, D^n = I power
     # Sort by the shifters by their cyclic powers
@@ -232,34 +241,33 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
         dPows[i].append(dShift)
         dPowsRecs[i].append(rec)
     # Check for commutability
-    # This is done smartly, only R/D matrix pairs which can even make tori are considered
-    for i in range(maxSize-1):
-        i = i+1
-        j = math.floor(maxSize/i)
-        if i > j:
-            break
-        if i*j == maxSize:
-            idx1=0
-            for R in rPows[i]:
-                idx1+=1
-                idx2=0
-                for D in dPows[j]:
-                    idx2+=1
-                    RD = (R @ D) % alphabetSize
-                    DR = (D @ R) % alphabetSize
-                    if np.array_equal(RD,DR):
-                         if checkCrossTerms(rPowsRecs[i][idx1],dPowsRecs[j][idx2],alphabetSize):
+    # This is done smartly, only R/D matrix pairs with matching factors as cyclic matrix powers
+    factors = factorize(maxSize)
+    halfway = m.ceil(len(factors)/2)
+    for i in range(halfway):
+        rIndex = factors[i]
+        dIndex = factors[len(factors)-i-1]
+        idx1=0
+        for R in rPows[rIndex]:
+            idx1+=1
+            idx2=0
+            for D in dPows[dIndex]:
+                idx2+=1
+                RD = (R @ D) % alphabetSize
+                DR = (D @ R) % alphabetSize
+                if np.array_equal(RD,DR):
+                        if checkCrossTerms(rPowsRecs[rIndex][idx1],dPowsRecs[dIndex][idx2],alphabetSize):
                             validShifters[0].append(R)
                             validShifters[1].append(D)
-                            validShifters[2].append(i)
-                            validShifters[3].append(j)       
+                            validShifters[2].append(rIndex)
+                            validShifters[3].append(dIndex)
                             if REPORT:
-                                output.write(f"Valid pair, dimension {i} x {j} \n")
+                                output.write(f"Valid pair, dimension {rIndex} x {dIndex} \n")
                                 output.write(str(R))
                                 output.write('\n')
                                 output.write(str(D))
                                 output.write('\n')
-                                output.write(str(makeDeBT(R,D,i,j,initWindow,alphabetSize)))
+                                output.write(str(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize)))
                                 output.write('\n')
     return()
     
