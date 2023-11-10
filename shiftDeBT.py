@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import itertools as it
 import math as m   
 import galois
-SANITY = True # Takes two found valid R and D shifters and shows it goes through the program correctly
+SANITY = False # Takes two found valid R and D shifters and shows it goes through the program correctly
 REPORT = True # Records all valid matricies
 PLOT = True
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
@@ -172,11 +172,13 @@ def factorize(num):
 # Correct Method 
 def checkCrossTerms(rPows,dPows,alphabetSize):
     dims = np.shape(rPows[0][0])
+    dimA = dims[0]-1
+    print(dims)
     for rP in rPows:
         for dP in dPows:
             temp = GF((rP - dP) % alphabetSize)
-            A = temp[0:4,0:4] # for readability
-            Ab = temp[0:4,0:5] # for readability
+            A = temp[0:dimA,0:dimA] # for readability
+            Ab = temp[0:dimA,0:dims[0]] # for readability
             nullA = A.null_space()
             nullAb = Ab.null_space()
             if (nullA.shape[0] != nullAb.shape[0]):
