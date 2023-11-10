@@ -182,7 +182,8 @@ def makeDeBT(R,D,n,m,initWindow,alphabetSize):
     return(deBT)
 
 
-def checkCrossTerms(rPows,dPows,alphabetSize):
+# Incorrect method det(R^i - D^j) != 0 
+def checkCrossTermsBad(rPows,dPows,alphabetSize):
     I = np.eye(5)
     for rP in rPows:
         for dP in dPows:
@@ -192,6 +193,23 @@ def checkCrossTerms(rPows,dPows,alphabetSize):
             if (det != 0):
                 return(False)
     return(True)
+
+
+# Instead checking rank(Ab) = rank(A) + 1 (therefore we have no lin dep on b)
+def checkCrossTerms(rPows,dPows,alphabetSize):
+    dims = np.shape(rPows[0][0])
+    dimAb = dims[0]-1;dimA = dims[0]-2  # for readability
+    I = np.eye(5)
+    for rP in rPows:
+        for dP in dPows:
+            temp = (rP - dP) % alphabetSize
+            rankAb = (np.linalg.matrix_rank(temp[0:dimAb][0:dimAb]))
+            rankA = (np.linalg.matrix_rank(temp[0:dimA][0:dimA])) 
+            if (rankAb == rankA + 1):
+                return(False)
+    return(True)
+
+
 # Brute force checking
 # Walk through all possible  
 def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
