@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import itertools as it
 import math as m   
 import galois
@@ -8,7 +9,7 @@ REPORT = True # Records all valid matricies
 PLOT = True
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
-ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
+ALPHABET = [0,1,2] # enumerate alphabet, this is needed for determinant conditions
 
 OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)}.txt"
 ALPHABETSIZE = len(ALPHABET)
@@ -42,7 +43,7 @@ def initDShifter():
 
 # Determinant conditions for shifters (sub matrix det == 0), currently for arbtirary alphabet on the 2x2 case 
 # Should be able to generalize from 2x2 window case
-def makeDetConds(alphabet = [0,1]):
+def makeDetConds(alphabet):
     windowSize = 4
     windows = it.product(alphabet,repeat = windowSize)
     validWindows = []
@@ -57,7 +58,7 @@ def makeDetConds(alphabet = [0,1]):
 
 # Affine condition on R/D matricies, currently for arbitrary alphabet on the 2x2 case
 # Should be able to generalize from 2x2 window case easily
-def makeConstConds(alphabet = [0,1]):
+def makeConstConds(alphabet):
     windowSize = 2
     windows = it.product(alphabet,repeat = windowSize)
     validWindows = []
@@ -73,7 +74,7 @@ def makeConstConds(alphabet = [0,1]):
 
 # Makes all the Rshifts and put them to a list
 # There must be a better way to enumerate all possible matricies. Currently just go through all possibilities in binary
-def makeAllRshifts(alphabet = [0,1]):
+def makeAllRshifts(alphabet):
     rMats = []
     rMat = initRShifter()
     detConditions = makeDetConds(alphabet) #pre-calcs valid det = 0 possibilities
@@ -106,7 +107,7 @@ def makeAllRshifts(alphabet = [0,1]):
 
 # Makes all the Dshifts and put them to a list
 # There must be a better way to enumerate all possible matricies. Currently just go through all possibilities in binary
-def makeAllDshifts(alphabet=[0,1]):
+def makeAllDshifts(alphabet):
     dMats = []
     dMat = initDShifter()
     detConditions = makeDetConds(alphabet) #pre-calcs possibilities
@@ -173,7 +174,6 @@ def factorize(num):
 def checkCrossTerms(rPows,dPows,alphabetSize):
     dims = np.shape(rPows[0][0])
     dimA = dims[0]-1
-    print(dims)
     for rP in rPows:
         for dP in dPows:
             temp = GF((rP - dP) % alphabetSize)
@@ -226,8 +226,21 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
         dPowsRecs[i].append(rec)
     # Check for commutability
     # This is done smartly, only R/D matrix pairs with matching factors as cyclic matrix powers
-    factors = factorize(maxSize)
+    factors = factorize(maxSize) 
     halfway = m.ceil(len(factors)/2)
+    if PLOT:
+        fig = plt.figure().gca()
+        ys = [] # make nicer?
+        xs = list(range(len(rPows)))
+        for powerQuant in rPows:
+            ys.append(len(powerQuant))
+        fig.xaxis.set_major_locator(MaxNLocator(integer = True)) # forces axis to be integers
+        bars = plt.bar(xs,ys,color = 'orange', width = 0.4)
+        for fact in factors:
+            bars[fact].set_color('red')
+        plt.title(f"Distribution of powers for |A| = {alphabetSize}")
+        plt.savefig(f'Power Dist for A = {alphabetSize}',dpi = 400)
+            
     for i in range(halfway):
         rIndex = factors[i] # Horz dimension of the tori
         dIndex = factors[len(factors)-i-1] # Vert dimension of the tori
