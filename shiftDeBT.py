@@ -8,12 +8,12 @@ import galois
 SANITY = False # Takes two found valid R and D shifters and shows it goes through the program correctly
 REPORT = True # Records all valid matricies
 PLOT = True # Plots barplots of powers
-MAIN = True # Incase I want to use code in here elsewhere
+MAIN = False # Incase I want to use code in here elsewhere
 if MAIN:
     import toriCheck
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
-ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
+ALPHABET = [0,1,2] # enumerate alphabet, this is needed for determinant conditions
 
 OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)}.txt"
 ALPHABETSIZE = len(ALPHABET)
@@ -33,7 +33,6 @@ def initRShifter():
         print(rMat)
     return(rMat)
 
-
 # Makes default DShift
 def initDShifter():
     dMat = np.zeros((5,5),dtype=int) 
@@ -44,7 +43,6 @@ def initDShifter():
         print("Generic D shifter")
         print(dMat)
     return(dMat)
-
 
 # Determinant conditions for shifters (sub matrix det == 0), currently for arbtirary alphabet on the 2x2 case s
 # Should be able to generalize from 2x2 window case
@@ -76,7 +74,6 @@ def makeConstConds(alphabet):
         print(npWindows)
     return(npWindows)
 
-
 # Makes all the Rshifts and put them to a list
 # There must be a better way to enumerate all possible matricies. Currently just go through all possibilities in binary
 def makeAllRshifts(alphabet):
@@ -107,9 +104,7 @@ def makeAllRshifts(alphabet):
                 newMat = np.copy(rMat)
                 rMats.append(newMat)
     return(rMats)
-
-    
-
+ 
 # Makes all the Dshifts and put them to a list
 # There must be a better way to enumerate all possible matricies. Currently just go through all possibilities in binary
 def makeAllDshifts(alphabet):
@@ -155,7 +150,6 @@ def determinePower(M,maxSize,alphabetSize,dim,bool = False):
         powRec.append(np.copy(N))
     return(0,[])
 
-
 # Generates a deBT from a pair of R,D shifters. Note you need to give the dimension
 def makeDeBT(R,D,n,m,initWindow,alphabetSize):
     # Generate deBT:
@@ -192,7 +186,7 @@ def checkCrossTerms(rPows,dPows,alphabetSize):
 
 # Brute force checking
 # Walk through all possible  
-def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
+def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow,numOfCells):
     # R shift pairs that make deBT with 0000 initial. Used for checking
     RGood = np.array([[0, 0, 1, 0, 0],
     [0, 0, 0, 1, 0],
@@ -237,7 +231,7 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
         fig = plt.figure().gca()
         ys = [] 
         xs = list(range(len(rPows)))
-        xTicks = np.append(fig.get_xticks(),factors)
+        # xTicks = np.append(fig.get_xticks(),factors)
         for powerQuant in rPows:
             ys.append(len(powerQuant))
         fig.xaxis.set_major_locator(MaxNLocator(integer = True)) # forces axis to be integers
@@ -248,7 +242,8 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
             fig.text( bars[fact].get_x() + bars[fact].get_width() / 2, height, f"{fact}", ha="center", va="bottom")
         plt.title(f"Distribution of powers for |A| = {alphabetSize}")
         plt.savefig(f'Power Dist for A = {alphabetSize}',dpi = 400)
-            
+    
+    idxSuccess = 0
     for i in range(halfway):
         rIndex = factors[i] # Horz dimension of the tori
         dIndex = factors[len(factors)-i-1] # Vert dimension of the tori
@@ -256,47 +251,49 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
         for R in rPows[rIndex]:
             idx2=0 # Identifies D
             for D in dPows[dIndex]:
-                # Check if 9x9 always fails.
-                RD = (R @ D) % alphabetSize
-                DR = (D @ R) % alphabetSize
-                if SANITY:
-                    if np.array_equal(RGood,R):
-                        if np.array_equal(DGood,D):
-                            print("Indicies for solution R when pulling out")
-                            print(rIndex,idx1)
-                            print("Indicies for solution D when pulling out")
-                            print(dIndex,idx2)
-                            print("Solution R,D commutable?")
-                            print(np.array_equal(RD,DR))
-                            print("Solution R,D have no smaller cycles?")
-                            print(checkCrossTerms(rPowsRecs[rIndex][idx1],dPowsRecs[dIndex][idx2],alphabetSize))
-                if np.array_equal(RD,DR):
-                        if checkCrossTerms(rPowsRecs[rIndex][idx1],dPowsRecs[dIndex][idx2],alphabetSize):
-                            if SANITY:
-                                if np.array_equal(RGood,R):
-                                    if np.array_equal(DGood,D):
-                                        print('Solution is being recorded as (R D hDim vDim deBT): ')
-                                        print(R)
-                                        print(D)
-                                        print(rIndex)
-                                        print(dIndex)
-                                        print(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize))
-                            validShifters[0].append(R)
-                            validShifters[1].append(D)
-                            validShifters[2].append(rIndex)
-                            validShifters[3].append(dIndex)
-                            output.write(f"Valid pair, dimension {rIndex} x {dIndex} \n")
-                            output.write(str(R))
-                            output.write('\n')
-                            output.write(str(D))
-                            output.write('\n')
-                            output.write(str(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize)))
-                            output.write('\n')
+                # # Check if 9x9 always fails.
+                # RD = (R @ D) % alphabetSize
+                # DR = (D @ R) % alphabetSize
+                # if SANITY:
+                #     if np.array_equal(RGood,R):
+                #         if np.array_equal(DGood,D):
+                #             print("Indicies for solution R when pulling out")
+                #             print(rIndex,idx1)
+                #             print("Indicies for solution D when pulling out")
+                #             print(dIndex,idx2)
+                #             print("Solution R,D commutable?")
+                #             print(np.array_equal(RD,DR))
+                #             print("Solution R,D have no smaller cycles?")
+                #             print(checkCrossTerms(rPowsRecs[rIndex][idx1],dPowsRecs[dIndex][idx2],alphabetSize))
+                # if np.array_equal(RD,DR):
+                #         if checkCrossTerms(rPowsRecs[rIndex][idx1],dPowsRecs[dIndex][idx2],alphabetSize):
+                #             if SANITY:
+                #                 if np.array_equal(RGood,R):
+                #                     if np.array_equal(DGood,D):
+                #                         print('Solution is being recorded as (R D hDim vDim deBT): ')
+                #                         print(R)
+                #                         print(D)
+                #                         print(rIndex)
+                #                         print(dIndex)
+                #                         print(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize))
+                if toriCheck.checkIfTori(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize),rIndex,dIndex,alphabetSize,numOfCells):
+                    idxSuccess+=1
+                    validShifters[0].append(R)
+                    validShifters[1].append(D)
+                    validShifters[2].append(rIndex)
+                    validShifters[3].append(dIndex)
+                    output.write(f"Valid pair, dimension {rIndex} x {dIndex} \n")
+                    output.write(f"R is {idx1} in list D is {idx2} in list. Pair is number {idxSuccess}. \n")
+                    output.write(str(R))
+                    output.write('\n')
+                    output.write(str(D))
+                    output.write('\n')
+                    output.write(str(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize)))
+                    output.write('\n')
                 idx2+=1
             idx1+=1
     return(validShifters)
     
-
 # Gets data from previous program, not really needed
 def pullAllFromText(file,arrayDim = 5):
     allLines = file.readlines()
@@ -321,10 +318,9 @@ def pullAllFromText(file,arrayDim = 5):
             allDs.append(np.array(newArray,dtype = int))
     return(allRs,allDs)
 
-
 if MAIN:
     # "Main" below
     maxToriSize = ALPHABETSIZE**NUMOFCELLS
     shifterDimension = NUMOFCELLS+1
-    bruteForceSearch(maxToriSize,shifterDimension,ALPHABET,ALPHABETSIZE,INITWINDOW)
+    bruteForceSearch(maxToriSize,shifterDimension,ALPHABET,ALPHABETSIZE,INITWINDOW,NUMOFCELLS)
 

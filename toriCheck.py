@@ -6,7 +6,7 @@ import itertools
 import math
 from jax import lax
 
-SANITY = False # Runs through case, self validation here
+SANITY = True # Runs through case, self validation here
 
 if SANITY:
     import shiftDeBT
@@ -16,8 +16,9 @@ def makeKernal(alphabetSize,numOfCells):
     kernel = jnp.zeros((2, 2, 1, 1), dtype=jnp.int32)
     # Has: O = 3, I = 2, H = 0, W = 1
     kernel += jnp.array(alphabetSize**(np.arange(numOfCells,dtype=int)).reshape(2,2))[:, :, jnp.newaxis, jnp.newaxis] # this is a very cool way to generate values
-    print("Kernal for neighbourhood")
-    print(kernel[:, :, 0, 0])
+    if SANITY:
+        print("Kernal for neighbourhood")
+        print(kernel[:, :, 0, 0])
     return(kernel)
 
 def runConv(deBT,kernel):
