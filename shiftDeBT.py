@@ -4,12 +4,13 @@ from matplotlib.ticker import MaxNLocator
 import itertools as it
 import jax.numpy as jnp
 import math as m   
-# import toriCheck
 import galois
 SANITY = False # Takes two found valid R and D shifters and shows it goes through the program correctly
 REPORT = True # Records all valid matricies
 PLOT = True # Plots barplots of powers
 MAIN = True # Incase I want to use code in here elsewhere
+if MAIN:
+    import toriCheck
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
 ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions

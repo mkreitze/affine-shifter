@@ -6,7 +6,7 @@ import itertools
 import math
 from jax import lax
 
-SANITY = True # Runs through case, self validation here
+SANITY = False # Runs through case, self validation here
 
 if SANITY:
     import shiftDeBT
