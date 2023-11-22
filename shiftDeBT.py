@@ -2,14 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import itertools as it
+import jax.numpy as jnp
 import math as m   
+import toriCheck
 import galois
 SANITY = False # Takes two found valid R and D shifters and shows it goes through the program correctly
 REPORT = True # Records all valid matricies
-PLOT = True
+PLOT = True # Plots barplots of powers
+MAIN = True # Incase I want to use code in here elsewhere
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
-ALPHABET = [0,1,2] # enumerate alphabet, this is needed for determinant conditions
+ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
 
 OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)}.txt"
 ALPHABETSIZE = len(ALPHABET)
@@ -41,7 +44,8 @@ def initDShifter():
         print(dMat)
     return(dMat)
 
-# Determinant conditions for shifters (sub matrix det == 0), currently for arbtirary alphabet on the 2x2 case 
+
+# Determinant conditions for shifters (sub matrix det == 0), currently for arbtirary alphabet on the 2x2 case s
 # Should be able to generalize from 2x2 window case
 def makeDetConds(alphabet):
     windowSize = 4
@@ -228,16 +232,19 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
     # This is done smartly, only R/D matrix pairs with matching factors as cyclic matrix powers
     factors = factorize(maxSize) 
     halfway = m.ceil(len(factors)/2)
-    if PLOT:
+    if PLOT: # turn into its own function, just generates bar plots. these explain why our method fails for higher |A| cases
         fig = plt.figure().gca()
-        ys = [] # make nicer?
+        ys = [] 
         xs = list(range(len(rPows)))
+        xTicks = np.append(fig.get_xticks(),factors)
         for powerQuant in rPows:
             ys.append(len(powerQuant))
         fig.xaxis.set_major_locator(MaxNLocator(integer = True)) # forces axis to be integers
         bars = plt.bar(xs,ys,color = 'orange', width = 0.4)
         for fact in factors:
             bars[fact].set_color('red')
+            height = bars[fact].get_height()
+            fig.text( bars[fact].get_x() + bars[fact].get_width() / 2, height, f"{fact}", ha="center", va="bottom")
         plt.title(f"Distribution of powers for |A| = {alphabetSize}")
         plt.savefig(f'Power Dist for A = {alphabetSize}',dpi = 400)
             
@@ -248,6 +255,7 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow):
         for R in rPows[rIndex]:
             idx2=0 # Identifies D
             for D in dPows[dIndex]:
+                # Check if 9x9 always fails.
                 RD = (R @ D) % alphabetSize
                 DR = (D @ R) % alphabetSize
                 if SANITY:
@@ -310,13 +318,12 @@ def pullAllFromText(file,arrayDim = 5):
             for line in lines:
                 newArray.append(line.split())
             allDs.append(np.array(newArray,dtype = int))
-
     return(allRs,allDs)
 
 
-
-# "Main" below
-maxToriSize = ALPHABETSIZE**NUMOFCELLS
-shifterDimension = NUMOFCELLS+1
-bruteForceSearch(maxToriSize,shifterDimension,ALPHABET,ALPHABETSIZE,INITWINDOW)
+if MAIN:
+    # "Main" below
+    maxToriSize = ALPHABETSIZE**NUMOFCELLS
+    shifterDimension = NUMOFCELLS+1
+    bruteForceSearch(maxToriSize,shifterDimension,ALPHABET,ALPHABETSIZE,INITWINDOW)
 
