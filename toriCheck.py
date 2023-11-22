@@ -6,17 +6,16 @@ import itertools
 import math
 from jax import lax
 
-SANITY = False # Runs through case, self validation here
+SANITY = True # Runs through case, self validation here
 
 if SANITY:
     import shiftDeBT
 
-def makeKernal():
+def makeKernal(alphabetSize,numOfCells):
     # This makes the kernal for crosses
     kernel = jnp.zeros((2, 2, 1, 1), dtype=jnp.int32)
     # Has: O = 3, I = 2, H = 0, W = 1
-    kernel += jnp.array([[1, 2],
-                        [4, 8]])[:, :, jnp.newaxis, jnp.newaxis] # this is a very cool way to generate values
+    kernel += jnp.array(alphabetSize**(np.arange(numOfCells,dtype=int)).reshape(2,2))[:, :, jnp.newaxis, jnp.newaxis] # this is a very cool way to generate values
     print("Kernal for neighbourhood")
     print(kernel[:, :, 0, 0])
     return(kernel)
@@ -32,7 +31,7 @@ def checkIfTori(RDdeBT,n,m,alphabetSize,numOfCells):
     deBT = jnp.zeros((1,2*n,2*m,1) , dtype=jnp.int32) # Has: N = 0, C = 3, H = 1, W = 2 
     tiled = jnp.tile(RDdeBT,(2,2))
     deBT = deBT.at[0,:,:,0].set(tiled)  
-    kernel = makeKernal()
+    kernel = makeKernal(alphabetSize,numOfCells)
     conv = runConv(deBT,kernel)
     if SANITY:
         print("Guessed deBT")

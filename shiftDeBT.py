@@ -4,7 +4,7 @@ from matplotlib.ticker import MaxNLocator
 import itertools as it
 import jax.numpy as jnp
 import math as m   
-import toriCheck
+# import toriCheck
 import galois
 SANITY = False # Takes two found valid R and D shifters and shows it goes through the program correctly
 REPORT = True # Records all valid matricies
