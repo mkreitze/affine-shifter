@@ -13,7 +13,7 @@ if MAIN:
     import toriCheck
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
-ALPHABET = [0,1,2] # enumerate alphabet, this is needed for determinant conditions
+ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
 
 OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)}.txt"
 ALPHABETSIZE = len(ALPHABET)

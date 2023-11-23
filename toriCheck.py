@@ -1,12 +1,14 @@
 # generic imports
 import jax.numpy as jnp
+import jax as j
 import matplotlib.pyplot as plt
 import numpy as np
 import itertools
 import math
 from jax import lax
+j.devices("cpu")[0]
 
-SANITY = True # Runs through case, self validation here
+SANITY = True  # Runs through case, self validation here
 
 if SANITY:
     import shiftDeBT
