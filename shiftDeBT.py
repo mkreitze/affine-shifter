@@ -10,8 +10,6 @@ SANITY = False # Takes two found valid R and D shifters and shows it goes throug
 REPORT = True # Records all valid matricies
 PLOT = True # Plots barplots of powers
 MAIN = True # Incase I want to use code in here elsewhere
-if MAIN:
-    import toriCheck
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
 ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
@@ -137,7 +135,7 @@ with j.default_device(j.devices("cpu")[0]): # forces cpu cause cuda is annoying
         return(dMats)
 
     # Determines m | M^m = I
-    # Used for both R and D shifters
+    # Stores M^1 to M^m ( I stored for later deBT checking )
     def determinePower(M,maxSize,alphabetSize,dim,bool = False):
         powRec = [] #records all the powers... useful for later
         N = np.copy(M)
@@ -147,6 +145,7 @@ with j.default_device(j.devices("cpu")[0]): # forces cpu cause cuda is annoying
             N = N @ M
             N = N % alphabetSize
             if np.array_equal(N,I):
+                powRec.append(np.copy(N))
                 return(i+2,powRec) # +2, we start at 0 but in reality i = 0 produces the 2nd power
             powRec.append(np.copy(N))
         return(0,[])
@@ -200,6 +199,21 @@ with j.default_device(j.devices("cpu")[0]): # forces cpu cause cuda is annoying
             figR.text( bars[fact].get_x() + bars[fact].get_width() / 2, height, f"{fact}", ha="center", va="bottom")
         plt.title(f"Distribution of {name} powers for |A| = {alphabetSize}")
         plt.savefig(f'Power Dist of {name} for A = {alphabetSize}',dpi = 400)   
+
+
+    def checkIfTori(Rpows,Dpows,n,m,initWindow,alphabetSize,numOfCells):
+        allPows = np.matmul(Rpows[:, np.newaxis],Dpows[np.newaxis,:])
+        powsOnW = (allPows @ initWindow) % 2
+        converter = np.array(alphabetSize**(np.arange(numOfCells,dtype=int)).reshape(numOfCells,1))
+        converted = powsOnW[:,:,0:n,0:m,np.newaxis] @ converter[:,:,np.newaxis]
+        sums = np.sum(converted,axis = 2)
+        extract = np.sort(sums.flatten())
+        allNums = np.arange(0,2**4)
+        return(np.array_equal(allNums,extract))
+
+
+
+
 
     # Brute force checking
     # Walk through all possible  
@@ -281,7 +295,7 @@ with j.default_device(j.devices("cpu")[0]): # forces cpu cause cuda is annoying
                     #                         print(rIndex)
                     #                         print(dIndex)
                     #                         print(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize))
-                    if toriCheck.checkIfTori(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize),rIndex,dIndex,alphabetSize,numOfCells):
+                    if checkIfTori(rPowsRecs,dPowsRecs,rIndex,dIndex,alphabetSize,initWindow,numOfCells):
                         idxSuccess+=1
                         validShifters[0].append(R)
                         validShifters[1].append(D)
