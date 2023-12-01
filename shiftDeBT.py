@@ -201,7 +201,8 @@ with j.default_device(j.devices("cpu")[0]): # forces cpu cause cuda is annoying
         plt.savefig(f'Power Dist of {name} for A = {alphabetSize}',dpi = 400)   
 
 
-    def checkIfTori(Rpows,Dpows,n,m,initWindow,alphabetSize,numOfCells):
+    def checkIfTori(Rpows,Dpows,n,m,alphabetSize,initWindow,numOfCells):
+        Rpows = np.array(Rpows); Dpows = np.array(Dpows)
         allPows = np.matmul(Rpows[:, np.newaxis],Dpows[np.newaxis,:])
         powsOnW = (allPows @ initWindow) % 2
         converter = np.array(alphabetSize**(np.arange(numOfCells,dtype=int)).reshape(numOfCells,1))
@@ -219,16 +220,17 @@ with j.default_device(j.devices("cpu")[0]): # forces cpu cause cuda is annoying
     # Walk through all possible  
     def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow,numOfCells):
         # R shift pairs that make deBT with 0000 initial. Used for checking
-        RGood = np.array([[0, 0, 1, 0, 0],
-        [0, 0, 0, 1, 0],
-        [0, 1, 1, 1, 0],
-        [1, 0, 1, 1, 1],
-        [0, 0, 0, 0, 1]])
-        DGood = np.array([[0, 1, 0, 0, 0],
-        [0, 1, 1, 1, 1],
-        [0, 0, 0, 1, 0],
-        [1, 1, 0, 1, 0],
-        [0, 0, 0, 0, 1]])
+        if SANITY:
+            RGood = np.array([[0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1],
+            [0, 0, 0, 0, 1]])
+            DGood = np.array([[0, 1, 0, 0, 0],
+            [0, 1, 1, 1, 1],
+            [0, 0, 0, 1, 0],
+            [1, 1, 0, 1, 0],
+            [0, 0, 0, 0, 1]])
 
         allRs = makeAllRshifts(alphabet)
         allDs = makeAllDshifts(alphabet)
@@ -264,11 +266,11 @@ with j.default_device(j.devices("cpu")[0]): # forces cpu cause cuda is annoying
         
         idxSuccess = 0
         for i in range(halfway):
-            rIndex = factors[i] # Horz dimension of the tori
-            dIndex = factors[len(factors)-i-1] # Vert dimension of the tori
-            idx1=0 # Identifies R
+            rIndex = factors[i] # Is horz dimension of the tori
+            dIndex = factors[len(factors)-i-1] # Is vert dimension of the tori
+            idxR=0 # Is specific R with cyclic power rIndex
             for R in rPows[rIndex]:
-                idx2=0 # Identifies D
+                idxD=0 # Is specific D with cyclic power dIndex
                 for D in dPows[dIndex]:
                     # # Check if 9x9 always fails.
                     # RD = (R @ D) % alphabetSize
@@ -295,22 +297,23 @@ with j.default_device(j.devices("cpu")[0]): # forces cpu cause cuda is annoying
                     #                         print(rIndex)
                     #                         print(dIndex)
                     #                         print(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize))
-                    if checkIfTori(rPowsRecs,dPowsRecs,rIndex,dIndex,alphabetSize,initWindow,numOfCells):
+                    if checkIfTori(rPowsRecs[rIndex][idxR],dPowsRecs[dIndex][idxD],rIndex,dIndex,alphabetSize,initWindow,numOfCells):
                         idxSuccess+=1
                         validShifters[0].append(R)
                         validShifters[1].append(D)
                         validShifters[2].append(rIndex)
                         validShifters[3].append(dIndex)
-                        output.write(f"Valid pair, dimension {rIndex} x {dIndex} \n")
-                        output.write(f"R is {idx1} in list D is {idx2} in list. Pair is number {idxSuccess}. \n")
-                        output.write(str(R))
-                        output.write('\n')
-                        output.write(str(D))
-                        output.write('\n')
-                        output.write(str(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize)))
-                        output.write('\n')
-                    idx2+=1
-                idx1+=1
+                        if REPORT:
+                            output.write(f"Valid pair, dimension {rIndex} x {dIndex} \n")
+                            output.write(f"R is {idxR} in list D is {idxD} in list. Pair is number {idxSuccess}. \n")
+                            output.write(str(R))
+                            output.write('\n')
+                            output.write(str(D))
+                            output.write('\n')
+                            output.write(str(makeDeBT(R,D,rIndex,dIndex,initWindow,alphabetSize)))
+                            output.write('\n')
+                    idxD+=1
+                idxR+=1
         return(validShifters)
         
     # Gets data from previous program, not really needed
