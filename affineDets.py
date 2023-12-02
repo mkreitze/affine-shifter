@@ -18,7 +18,7 @@ def makeAllMatricies(dim,matrixSize,alphabetSize):
             seq.append(i)
     return(seq)
 
-output = open(f"{OUTPUT}","w")s
+output = open(f"{OUTPUT}","w")
 
 for alphabet in ALPHABETS:
     output.write(f"For alphabet {alphabet} \n")
