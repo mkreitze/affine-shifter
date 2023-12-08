@@ -13,7 +13,7 @@ PLOT = True # Plots barplots of powers
 MAIN = True # Incase I want to use code in here elsewhere
 WINDOWSIZE = "2x2" # Not implemented for general windows, currently hardcoded for 2x2
 NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
-ALPHABET = [0,1,2] # enumerate alphabet, this is needed for determinant conditions
+ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
 
 OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)}.txt"
 ALPHABETSIZE = len(ALPHABET)
@@ -171,7 +171,7 @@ def makeDeBT(R,D,n,m,initWindow,alphabetSize):
 def factorize(num):
     return [n for n in range(1, num + 1) if num % n == 0]
 
-# Correct Method 
+# Correct Method Not used, incorrect somehow
 def checkCrossTerms(rPows,dPows,alphabetSize):
     dims = np.shape(rPows[0][0])
     dimA = dims[0]-1
@@ -202,14 +202,23 @@ def plotPows(pows,name,factors,alphabetSize):
     plt.title(f"Distribution of {name} powers for |A| = {alphabetSize}")
     plt.savefig(f'Power Dist of {name} for A = {alphabetSize}',dpi = 400)   
 
+# Hard coded for 2x2 window, need to think of how to do this in the future
+# Takes in power matrix applied to some starting window
+def checkConnections(allWindows):
+    rFront = [2,3]; lFront = [0,1]
+    dFront = [1,3]; uFront = [0,2]
+    testR = np.roll(allWindows[:,:,:],-1,axis = 0) 
+    testD = np.roll(allWindows[:,:,:],-1,axis = 1) 
+    if np.array_equal(testR[:,:,lFront],allWindows[:,:,rFront]): # notice R needs all things 'sent left' to match with everything 'sent right'
+        if np.array_equal(testD[:,:,uFront],allWindows[:,:,dFront]): # notice D needs all things 'sent up' to match with everything 'sent down'
+            return(True) 
+    else:
+        return(False)
 
-def checkIfTori(Rpows,Dpows,alphabetSize,initWindow,numOfCells):
-    Rpows = np.array(Rpows); Dpows = np.array(Dpows)
-    allPows = np.matmul(Rpows[:, np.newaxis],Dpows[np.newaxis,:])
-    powsOnW = (allPows @ initWindow) % alphabetSize
+def checkUniqueness(allWindows,alphabetSize,initWindow,numOfCells):
     converter = np.array(alphabetSize**(np.arange(numOfCells,dtype=int)).reshape(numOfCells,1))
     w = len(initWindow) - 1
-    converted = powsOnW[:,:,0:w,0:w,np.newaxis] @ converter[:,:,np.newaxis]
+    converted = allWindows[:,:,0:w,0:w,np.newaxis] @ converter[:,:,np.newaxis]
     sums = np.sum(converted,axis = 2)
     extract = np.sort(sums.flatten())
     allNums = np.arange(0,alphabetSize**w)
@@ -274,13 +283,16 @@ def bruteForceSearch(maxSize,dim,alphabet,alphabetSize,initWindow,numOfCells):
                 # RD = (R[0] @ D[0]) % alphabetSize
                 # DR = (D[0] @ R[0]) % alphabetSize
                 # if np.array_equal(RD,DR):
-                #     print(" I Got here")
-                if checkIfTori(rPowRecs[rIndex][idxR],dPowRecs[dIndex][idxD],alphabetSize,initWindow,numOfCells):
-                    idxSuccess+=1
-                    validShifters[0].append(R)
-                    validShifters[1].append(D)
-                    validShifters[2].append(rIndex)
-                    validShifters[3].append(dIndex)
+                Rpows = np.array(rPowRecs[rIndex][idxR]); Dpows = np.array(dPowRecs[dIndex][idxD])
+                allPows = np.matmul(Rpows[:, np.newaxis],Dpows[np.newaxis,:])
+                allWindows = (allPows @ initWindow) % alphabetSize
+                if checkUniqueness(allWindows,alphabetSize,initWindow,numOfCells):
+                    if checkConnections(allWindows):
+                        idxSuccess+=1
+                        validShifters[0].append(R)
+                        validShifters[1].append(D)
+                        validShifters[2].append(rIndex)
+                        validShifters[3].append(dIndex)
                     if REPORTSHIFTERS:
                         output.write(f"Valid pair, dimension {rIndex} x {dIndex} \n")
                         output.write(f"R is {idxR} in list D is {idxD} in list. Pair is number {idxSuccess}. \n")

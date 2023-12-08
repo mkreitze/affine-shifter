@@ -15,7 +15,7 @@ R is 0 in list D is 1 in list. Pair is number 1.
  [1 0 1 1]
  [0 1 1 1]]
 Valid pair, dimension 4 x 4 
-R is 0 in list D is 2 in list. Pair is number 2. 
+R is 0 in list D is 2 in list. Pair is number 1. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 0]
@@ -31,7 +31,7 @@ R is 0 in list D is 2 in list. Pair is number 2.
  [1 1 1 0]
  [1 1 1 0]]
 Valid pair, dimension 4 x 4 
-R is 0 in list D is 3 in list. Pair is number 3. 
+R is 0 in list D is 3 in list. Pair is number 1. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 0]
@@ -47,7 +47,7 @@ R is 0 in list D is 3 in list. Pair is number 3.
  [1 1 1 0]
  [1 1 1 0]]
 Valid pair, dimension 4 x 4 
-R is 0 in list D is 8 in list. Pair is number 4. 
+R is 0 in list D is 8 in list. Pair is number 2. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 0]
@@ -63,7 +63,7 @@ R is 0 in list D is 8 in list. Pair is number 4.
  [1 0 1 1]
  [0 1 1 1]]
 Valid pair, dimension 4 x 4 
-R is 0 in list D is 14 in list. Pair is number 5. 
+R is 0 in list D is 14 in list. Pair is number 2. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 0]
@@ -79,7 +79,7 @@ R is 0 in list D is 14 in list. Pair is number 5.
  [1 1 1 0]
  [1 1 1 0]]
 Valid pair, dimension 4 x 4 
-R is 0 in list D is 15 in list. Pair is number 6. 
+R is 0 in list D is 15 in list. Pair is number 2. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 0]
@@ -95,7 +95,7 @@ R is 0 in list D is 15 in list. Pair is number 6.
  [1 1 1 0]
  [1 1 1 0]]
 Valid pair, dimension 4 x 4 
-R is 1 in list D is 0 in list. Pair is number 7. 
+R is 1 in list D is 0 in list. Pair is number 3. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 1]
@@ -111,7 +111,7 @@ R is 1 in list D is 0 in list. Pair is number 7.
  [0 1 1 1]
  [1 0 1 1]]
 Valid pair, dimension 4 x 4 
-R is 1 in list D is 2 in list. Pair is number 8. 
+R is 1 in list D is 2 in list. Pair is number 3. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 1]
@@ -127,7 +127,7 @@ R is 1 in list D is 2 in list. Pair is number 8.
  [1 1 0 1]
  [1 1 0 1]]
 Valid pair, dimension 4 x 4 
-R is 1 in list D is 3 in list. Pair is number 9. 
+R is 1 in list D is 3 in list. Pair is number 3. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 1]
@@ -143,7 +143,7 @@ R is 1 in list D is 3 in list. Pair is number 9.
  [1 1 0 1]
  [1 1 0 1]]
 Valid pair, dimension 4 x 4 
-R is 1 in list D is 4 in list. Pair is number 10. 
+R is 1 in list D is 4 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 1]
@@ -159,7 +159,7 @@ R is 1 in list D is 4 in list. Pair is number 10.
  [0 1 1 1]
  [1 0 1 1]]
 Valid pair, dimension 4 x 4 
-R is 1 in list D is 14 in list. Pair is number 11. 
+R is 1 in list D is 14 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 1]
@@ -175,7 +175,7 @@ R is 1 in list D is 14 in list. Pair is number 11.
  [1 1 0 1]
  [1 1 0 1]]
 Valid pair, dimension 4 x 4 
-R is 1 in list D is 15 in list. Pair is number 12. 
+R is 1 in list D is 15 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [0 1 1 1 1]
@@ -191,7 +191,7 @@ R is 1 in list D is 15 in list. Pair is number 12.
  [1 1 0 1]
  [1 1 0 1]]
 Valid pair, dimension 4 x 4 
-R is 16 in list D is 2 in list. Pair is number 13. 
+R is 16 in list D is 2 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 1 0 1 0]
@@ -207,7 +207,7 @@ R is 16 in list D is 2 in list. Pair is number 13.
  [1 1 1 0]
  [1 1 1 0]]
 Valid pair, dimension 4 x 4 
-R is 16 in list D is 3 in list. Pair is number 14. 
+R is 16 in list D is 3 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 1 0 1 0]
@@ -223,7 +223,7 @@ R is 16 in list D is 3 in list. Pair is number 14.
  [1 1 1 0]
  [1 1 1 0]]
 Valid pair, dimension 4 x 4 
-R is 16 in list D is 14 in list. Pair is number 15. 
+R is 16 in list D is 14 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 1 0 1 0]
@@ -239,7 +239,7 @@ R is 16 in list D is 14 in list. Pair is number 15.
  [1 1 1 0]
  [1 1 1 0]]
 Valid pair, dimension 4 x 4 
-R is 16 in list D is 15 in list. Pair is number 16. 
+R is 16 in list D is 15 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 1 0 1 0]
@@ -255,7 +255,7 @@ R is 16 in list D is 15 in list. Pair is number 16.
  [1 1 1 0]
  [1 1 1 0]]
 Valid pair, dimension 4 x 4 
-R is 19 in list D is 2 in list. Pair is number 17. 
+R is 19 in list D is 2 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 1 0 1 1]
@@ -271,7 +271,7 @@ R is 19 in list D is 2 in list. Pair is number 17.
  [1 1 0 1]
  [1 1 0 1]]
 Valid pair, dimension 4 x 4 
-R is 19 in list D is 3 in list. Pair is number 18. 
+R is 19 in list D is 3 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 1 0 1 1]
@@ -287,7 +287,7 @@ R is 19 in list D is 3 in list. Pair is number 18.
  [1 1 0 1]
  [1 1 0 1]]
 Valid pair, dimension 4 x 4 
-R is 19 in list D is 14 in list. Pair is number 19. 
+R is 19 in list D is 14 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 1 0 1 1]
@@ -303,7 +303,7 @@ R is 19 in list D is 14 in list. Pair is number 19.
  [1 1 0 1]
  [1 1 0 1]]
 Valid pair, dimension 4 x 4 
-R is 19 in list D is 15 in list. Pair is number 20. 
+R is 19 in list D is 15 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 1 0 1 1]
@@ -319,7 +319,7 @@ R is 19 in list D is 15 in list. Pair is number 20.
  [1 1 0 1]
  [1 1 0 1]]
 Valid pair, dimension 4 x 4 
-R is 22 in list D is 2 in list. Pair is number 21. 
+R is 22 in list D is 2 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 0 0 0 1]
@@ -335,7 +335,7 @@ R is 22 in list D is 2 in list. Pair is number 21.
  [1 1 0 0]
  [1 1 0 0]]
 Valid pair, dimension 4 x 4 
-R is 22 in list D is 3 in list. Pair is number 22. 
+R is 22 in list D is 3 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 0 0 0 1]
@@ -351,7 +351,7 @@ R is 22 in list D is 3 in list. Pair is number 22.
  [1 1 0 0]
  [1 1 0 0]]
 Valid pair, dimension 4 x 4 
-R is 22 in list D is 14 in list. Pair is number 23. 
+R is 22 in list D is 14 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 0 0 0 1]
@@ -367,7 +367,7 @@ R is 22 in list D is 14 in list. Pair is number 23.
  [1 1 0 0]
  [1 1 0 0]]
 Valid pair, dimension 4 x 4 
-R is 22 in list D is 15 in list. Pair is number 24. 
+R is 22 in list D is 15 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 0 0 0 1]
@@ -383,7 +383,7 @@ R is 22 in list D is 15 in list. Pair is number 24.
  [1 1 0 0]
  [1 1 0 0]]
 Valid pair, dimension 4 x 4 
-R is 23 in list D is 2 in list. Pair is number 25. 
+R is 23 in list D is 2 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 0 0 0 1]
@@ -399,7 +399,7 @@ R is 23 in list D is 2 in list. Pair is number 25.
  [1 1 0 0]
  [1 1 0 0]]
 Valid pair, dimension 4 x 4 
-R is 23 in list D is 3 in list. Pair is number 26. 
+R is 23 in list D is 3 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 0 0 0 1]
@@ -415,7 +415,7 @@ R is 23 in list D is 3 in list. Pair is number 26.
  [1 1 0 0]
  [1 1 0 0]]
 Valid pair, dimension 4 x 4 
-R is 23 in list D is 14 in list. Pair is number 27. 
+R is 23 in list D is 14 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 0 0 0 1]
@@ -431,7 +431,7 @@ R is 23 in list D is 14 in list. Pair is number 27.
  [1 1 0 0]
  [1 1 0 0]]
 Valid pair, dimension 4 x 4 
-R is 23 in list D is 15 in list. Pair is number 28. 
+R is 23 in list D is 15 in list. Pair is number 4. 
 [[0 0 1 0 0]
  [0 0 0 1 0]
  [1 0 0 0 1]
