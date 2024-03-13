@@ -8,7 +8,7 @@ NUMOFCELLS = 4 # Note, each R/D matrix is a square matrix of this + 1
 INITWINDOW = np.array(NUMOFCELLS*[0],dtype = int)
 INITWINDOW.shape = (NUMOFCELLS,1)
 INITWINDOW[0] = 1 # This produces the vec form of the initial window 1 0 0 ...  
-SANITY = False
+SANITY = True
 
 
 # Makes default Rshift
@@ -46,6 +46,22 @@ def getDetEntries(detSize,detShape):
                 print(test2)
     return(dets)
 
+# Generates a deBT from a pair of R,D shifters. Note you need to give the dimension
+def makeDeBT(R,D,n,m):
+    # Generate deBT:
+    firstInRow = np.copy(INITWINDOW)
+    deBT = np.zeros((n,m),dtype=int)
+    for i in range(n):
+        nextInCol = np.copy(firstInRow)
+        for j in range(m):
+            deBT[i,j] = nextInCol[0,0]
+            nextInCol = R @ nextInCol
+            nextInCol = nextInCol % ALPHABETSIZE
+        firstInRow = D @ firstInRow
+        firstInRow = firstInRow % ALPHABETSIZE
+    unique, counts = np.unique(deBT, return_counts=True)
+    uniqueCounts = dict(zip(unique, counts)) 
+    return(deBT)
 
 unresolvedEntries = 8
 
@@ -64,35 +80,20 @@ for det in dets:
     for frees in allFrees:
         freeChunk = np.array(frees,dtype = int)
         freeChunk.shape = freeShape
-        baseR[detRows[0],detCols[0]:detCols[1]+1] = det[0]
-        baseR[detRows[1],detCols[0]:detCols[1]+1] = det[1]
-        baseR[freeRows[0],freeCols[0]:freeCols[1]+1] = freeChunk[0]
-        baseR[freeRows[1],freeCols[0]:freeCols[1]+1] = freeChunk[1]
+        baseR[2,0] = det[0,0]
+        baseR[2,1] = det[0,1]
+        baseR[3,0] = det[1,0]
+        baseR[3,1] = det[1,1]
+        baseR[2,2] = freeChunk[0,0]
+        baseR[2,3] = freeChunk[0,1]
+        baseR[3,2] = freeChunk[1,0]
+        baseR[3,3] = freeChunk[1,1]        
         rs.append(baseR)
     
 
-# Generates a deBT from a pair of R,D shifters. Note you need to give the dimension
-def makeDeBT(R,D,n,m):
-    # Generate deBT:
-    firstInRow = np.copy(INITWINDOW)
-    deBT = np.zeros((n,m),dtype=int)
-    for i in range(n):
-        nextInCol = np.copy(firstInRow)
-        for j in range(m):
-            deBT[i,j] = nextInCol[0,0]
-            nextInCol = R @ nextInCol
-            nextInCol = nextInCol % ALPHABETSIZE
-        firstInRow = D @ firstInRow
-        firstInRow = firstInRow % ALPHABETSIZE
-    unique, counts = np.unique(deBT, return_counts=True)
-    uniqueCounts = dict(zip(unique, counts)) 
-    if uniqueCounts[1] == 6:
-        deBT[0] = 3
-    return(deBT)
-
 
 ds = []
-detRows = [1,3];detCols = [0,1]
+detRows = [1,2];detCols = [0,2]
 freeRows = [1,3];freeCols = [2,3];freeShape = (2,2)
 # makes Ds 
 # only applies det condition
@@ -101,26 +102,38 @@ for det in dets:
     for frees in allFrees:
         freeChunk = np.array(frees,dtype = int)
         freeChunk.shape = freeShape
-        baseD[detRows[0],detCols[0]:detCols[1]+1] = det[0]
-        baseD[detRows[1],detCols[0]:detCols[1]+1] = det[1]
-        baseD[freeRows[0],freeCols[0]:freeCols[1]+1] = freeChunk[0]
-        baseD[freeRows[1],freeCols[0]:freeCols[1]+1] = freeChunk[1]
+        baseD[2,0] = det[0,0]
+        baseD[3,0] = det[0,1]
+        baseD[1,2] = det[1,0]
+        baseD[3,2] = det[1,1]
+        baseD[1,1] = freeChunk[0,0]
+        baseD[1,3] = freeChunk[0,1]
+        baseD[3,1] = freeChunk[1,0]
+        baseD[3,3] = freeChunk[1,1]        
         ds.append(baseD)
 
-protoDeBTs = [1]
+protoDeBTs = [makeDeBT(rs[0],ds[0],5,3)]
+protoDeBTsWithNotes = []
+
 for idxR,r in enumerate(rs):
     for idxD,d in enumerate(ds):
         a = makeDeBT(r,d,5,3)
-        if not a.any() == 3:
-            print(a)
-            print(f'{idxR} {idxD}\n')
-            # for protoDeBT in protoDeBTs:
-            #     if not np.array_equal(a,protoDeBT):
-            #         protoDeBTs.append(a)
-            #         protoDeBTs.append(f'{idxR} {idxD}\n')
+        rd = (r@d)%ALPHABETSIZE
+        dr = (d@r)%ALPHABETSIZE
+        if np.array_equal(rd,dr):
+            if SANITY:
+                print(f'{a} {idxR} {idxD}\n')
+            test = True
+            for protoDeBT in protoDeBTs:
+                if np.array_equal(a,protoDeBT):
+                    test = False 
+            if test:
+                protoDeBTs.append(a)
+                protoDeBTsWithNotes.append(f"{a} R {idxR} D {idxD} \n")
+                print(idxR)
 
-# for protoDeBT in protoDeBTs:
-#     print(protoDeBT)
 
-print(rs[95])
-print(ds[9])
+# print(f"All unique 'deBTS' found:")
+# for deBT in protoDeBTsWithNotes:
+#     print(deBT)
+# print(len(protoDeBTsWithNotes))
