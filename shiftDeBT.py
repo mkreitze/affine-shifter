@@ -17,13 +17,14 @@ ALPHABET = [0,1] # enumerate alphabet, this is needed for determinant conditions
 
 OUTPUT = f"deBTShifters 2x2 a{len(ALPHABET)}.txt"
 ALPHABETSIZE = len(ALPHABET)
-INITWINDOW = np.array([0,0,0,0,1],dtype = int)
+INITWINDOW = np.array([1,1,0,1,1],dtype = int)
 INITWINDOW.shape = (5,1)
 GF = galois.GF(ALPHABETSIZE)
 
 # with j.default_device(j.devices("cpu")[0]): # forces cpu cause cuda is annoying (not using jax rn)
 
 # Makes default Rshift
+
 def initRShifter():
     rMat = np.zeros((5,5),dtype=int) 
     rMat[0,2] = 1
